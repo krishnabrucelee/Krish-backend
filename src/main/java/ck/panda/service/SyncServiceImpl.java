@@ -866,9 +866,15 @@ public class SyncServiceImpl implements SyncService {
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Primary storage", e);
         }
+        try {
+            // 48. Sync VPN Customer gateway entity
+            this. syncVPNCustomerGateway();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPN customer gateway", e);
+        }
 
         try {
-            // 48. Sync general configuration
+            // 49. Sync general configuration
             this.syncGeneralConfiguration();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch General Configuration", e);

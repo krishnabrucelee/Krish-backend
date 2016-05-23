@@ -10,16 +10,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.VPNCustomerGateway;
-import ck.panda.domain.repository.jpa.PodRepository;
 import ck.panda.domain.repository.jpa.VPNCustomerGatewayRepository;
 import ck.panda.util.CSVPNService;
-import ck.panda.util.CloudStackPodService;
-import ck.panda.util.CloudStackVPCService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
@@ -49,6 +45,7 @@ public class VPNCustomerGatewayServiceImpl implements VPNCustomerGatewayService 
     @Autowired
     private ConfigUtil configServer;
 
+    /** Reference of the project service*/
     @Autowired
     private ProjectService projectService;
 
@@ -56,8 +53,15 @@ public class VPNCustomerGatewayServiceImpl implements VPNCustomerGatewayService 
     @Autowired
     private ConfigUtil config;
 
+    /** Reference of the domain service. */
     @Autowired
     private DomainService domainService;
+
+    /** Constant for peer detection. */
+    public static final String CS_listcustomer_gateway = "listvpncustomergatewaysresponse";
+
+    /** Constant for peer detection. */
+    public static final String VPN_CUSOTMER_GATEWAY = "vpncustomergateway";
 
     @Override
     public VPNCustomerGateway save(VPNCustomerGateway vpnGateway) throws Exception {
@@ -99,27 +103,38 @@ public class VPNCustomerGatewayServiceImpl implements VPNCustomerGatewayService 
 
     @Override
     public List<VPNCustomerGateway> findAllFromCSServer() throws Exception {
-         List<Project> project = projectService.findAllByActive(true);
+        List<Project> projectList = projectService.findAllByActive(true);
         List<VPNCustomerGateway> gatewayList = new ArrayList<VPNCustomerGateway>();
-        HashMap<String, String> podMap = new HashMap<String, String>();
-        for (int j = 0; j <= project.size(); j++) {
-            HashMap<String, String> volumeMap = new HashMap<String, String>();
-            if (j == project.size()) {
-                volumeMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
-            } else {
-                volumeMap.put(CloudStackConstants.CS_PROJECT_ID, project.get(j).getUuid());
-            }
-            // 1. Get the list of Volume from CS server using CS connector
-            config.setServer(1L);
+        for (Project project: projectList) {
+            HashMap<String, String> gatewayMap = new HashMap<String, String>();
+            gatewayMap.put(CloudStackConstants.CS_PROJECT_ID, project.getUuid());
+            gatewayList = getGatewayList(gatewayMap, gatewayList);
+        }
 
+        HashMap<String, String> gatewayMap = new HashMap<String, String>();
+        gatewayMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+        gatewayList = getGatewayList(gatewayMap, gatewayList);
+        return gatewayList;
+        }
+
+
+    /**
+     * Get Gateway List for Sync.
+     *
+     * @param gatewayMap hashMap of the network
+     * @param GatewayList list of vpn customer gateway.
+     * @return return vpn customer gateway
+     * @throws Exception unHandled Exceptions
+     */
+    private List<VPNCustomerGateway> getGatewayList(HashMap<String, String> gatewayMap, List<VPNCustomerGateway> gatewayList) throws Exception {
+        config.setServer(1L);
         // 1. Get the list of pods from CS server using CS connector
-        String response = csVpnService.listVpnCustomerGateways(podMap, "json");
-
+        String response = csVpnService.listVpnCustomerGateways(gatewayMap, CloudStackConstants.JSON);
         JSONArray podListJSON = null;
         configServer.setServer(1L);
-        JSONObject responseObject = new JSONObject(response).getJSONObject("listvpncustomergatewaysresponse");
-        if (responseObject.has("vpncustomergateway")) {
-            podListJSON = responseObject.getJSONArray("vpncustomergateway");
+        JSONObject responseObject = new JSONObject(response).getJSONObject(CS_listcustomer_gateway);
+        if (responseObject.has(VPN_CUSOTMER_GATEWAY)) {
+            podListJSON = responseObject.getJSONArray(VPN_CUSOTMER_GATEWAY);
             // 2. Iterate the json list, convert the single json entity to vpnGateway
             for (int i = 0, size = podListJSON.length(); i < size; i++) {
                 // 2.1 Call convert by passing JSONObject to Domain entity and
@@ -131,8 +146,6 @@ public class VPNCustomerGatewayServiceImpl implements VPNCustomerGatewayService 
                     vpnGateway.setProjectId(convertEntityService.getProjectId(vpnGateway.getTransProjectId()));
                     vpnGateway.setDepartmentId(projectService.find(vpnGateway.getProjectId()).getDepartmentId());
                 } else {
-                    // departmentRepository.findByUuidAndIsActive(volume.getTransDepartmentId(),
-                    // true);
                     Domain domain = domainService.find(vpnGateway.getDomainId());
                     vpnGateway.setDepartmentId(convertEntityService
                             .getDepartmentByUsernameAndDomains(vpnGateway.getTransDepartmentId(), domain));
@@ -140,7 +153,7 @@ public class VPNCustomerGatewayServiceImpl implements VPNCustomerGatewayService 
                 gatewayList.add(vpnGateway);
             }
           }
-        }
         return gatewayList;
     }
+
 }

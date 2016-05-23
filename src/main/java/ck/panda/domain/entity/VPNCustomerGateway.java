@@ -23,7 +23,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
@@ -33,7 +32,29 @@ import ck.panda.util.JsonUtil;
 @SuppressWarnings("serial")
 public class VPNCustomerGateway implements Serializable {
 
-      /** Id of the vpn customer gateway. */
+     /** Constant for ike life time. */
+    public static final String CS_IKE_LIFETIME = "ikelifetime";
+
+    /** Constant for esp life time. */
+    public static final String CS_ESP_LIFETIME = "esplifetime";
+
+    /** Constant for ike policy. */
+    public static final String CS_IKE_POLICY = "ikepolicy";
+
+    /** Constant for esp policy. */
+    public static final String CS_ESP_POLICY = "esppolicy";
+
+    /** Constant for peer detection. */
+    public static final String CS_DPD = "dpd";
+
+    /** Constant for cidr list. */
+    public static final String CS_CIDR_LIST = "cidrlist";
+
+    /** Constant for ip secondary secret key. */
+    public static final String CS_IPSEC_SHARED =  "ipsecpsk";
+
+
+    /** Id of the vpn customer gateway. */
     @Id
     @GeneratedValue
     @Column(name = "id")
@@ -764,18 +785,18 @@ public class VPNCustomerGateway implements Serializable {
             gateway.setName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NAME));
             gateway.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
             gateway.setGateway(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_GATEWAY));
-            gateway.setcIDR(JsonUtil.getStringValue(jsonObject, "cidrlist"));
+            gateway.setcIDR(JsonUtil.getStringValue(jsonObject, CS_CIDR_LIST));
             gateway.setIsActive(true);
             gateway.setTransDomainId((JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DOMAIN_ID)));
             gateway.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ACCOUNT));
             gateway.setTransProjectId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_PROJECT_ID));
-            gateway.setIpsecPresharedKey(JsonUtil.getStringValue(jsonObject, "ipsecpsk"));
-            gateway.setIKELifeTime(JsonUtil.getStringValue(jsonObject,"ikelifetime"));
-            gateway.setESPLifeTime(JsonUtil.getStringValue(jsonObject,"esplifetime"));
-            gateway.setDeadPeerDetection(JsonUtil.getStringValue(jsonObject,"dpd"));
+            gateway.setIpsecPresharedKey(JsonUtil.getStringValue(jsonObject, CS_IPSEC_SHARED));
+            gateway.setIKELifeTime(JsonUtil.getStringValue(jsonObject,CS_IKE_LIFETIME));
+            gateway.setESPLifeTime(JsonUtil.getStringValue(jsonObject,CS_ESP_LIFETIME));
+            gateway.setDeadPeerDetection(JsonUtil.getStringValue(jsonObject,CS_DPD));
             gateway.setSyncFlag(true);
-            gateway.setIkePolicy(JsonUtil.getStringValue(jsonObject,"ikepolicy"));
-            gateway.setEspPolicy(JsonUtil.getStringValue(jsonObject,"esppolicy"));
+            gateway.setIkePolicy(JsonUtil.getStringValue(jsonObject,CS_IKE_POLICY));
+            gateway.setEspPolicy(JsonUtil.getStringValue(jsonObject,CS_ESP_POLICY));
 
         } catch (Exception ex) {
             ex.printStackTrace();
