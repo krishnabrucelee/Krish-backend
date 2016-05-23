@@ -1193,7 +1193,7 @@ public class SyncServiceImpl implements SyncService {
             // in a hash using uuid
             if (csStorageOfferingMap.containsKey(storageOffering.getUuid())) {
                 StorageOffering csStorageOffering = csStorageOfferingMap.get(storageOffering.getUuid());
-                if (csStorageOffering.getTransDomainId() != null){
+                if (csStorageOffering.getTransDomainId() != null && convertEntityService.getDomain(csStorageOffering.getTransDomainId()) != null){
                     storageOffering.setDomainId(convertEntityService.getDomain(csStorageOffering.getTransDomainId()).getId());
                 }
 
