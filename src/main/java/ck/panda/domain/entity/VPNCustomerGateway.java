@@ -100,11 +100,11 @@ public class VPNCustomerGateway implements Serializable {
     @Column(name = "esp_policy")
     private String espPolicy;
 
-    /** ike encryption of the vpn customer gateway. */
+    /** Ike encryption of the vpn customer gateway. */
     @Transient
     private String ikeEncryption;
 
-    /** ike hash of the vpn customer gateway. */
+    /** Ike hash of the vpn customer gateway. */
     @Transient
     private String ikeHash;
 
@@ -134,7 +134,7 @@ public class VPNCustomerGateway implements Serializable {
     @ManyToOne
     private Project project;
 
-    /** vpn customer gateway vpn customer gateway. */
+    /** Vpn customer gateway vpn customer gateway. */
     @Column(name = "project_id")
     private Long projectId;
 
@@ -143,7 +143,7 @@ public class VPNCustomerGateway implements Serializable {
     @ManyToOne
     private Department department;
 
-    /** id for the Department of the vpn customer gateway. */
+    /** Id for the Department of the vpn customer gateway. */
     @Column(name = "department_id")
     private Long departmentId;
 
