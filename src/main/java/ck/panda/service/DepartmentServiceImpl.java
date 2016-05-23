@@ -251,17 +251,25 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Department> findAll() throws Exception {
-        return (List<Department>) departmentRepo.findAllByIsActive(true, AccountType.USER);
+        return (List<Department>) departmentRepo.findAllByIsActive(true);
     }
 
     @Override
     public Page<Department> findAllByActive(PagingAndSorting pagingAndSorting, Long userId) throws Exception {
-        Domain domain = convertEntityService.getOwnerById(userId).getDomain();
+        User user = convertEntityService.getOwnerById(userId);
+        Domain domain = user.getDomain();
         if (domain != null && !domain.getName().equals("ROOT")) {
+            List<AccountType> types = new ArrayList<AccountType>();
+            if (user.getType() == User.UserType.USER) {
+                types.add(Department.AccountType.USER);
+            } else {
+                types.add(Department.AccountType.USER);
+                types.add(Department.AccountType.DOMAIN_ADMIN);
+            }
             return departmentRepo.findByDomainAndIsActive(domain.getId(), true, pagingAndSorting.toPageRequest(),
-                    AccountType.USER);
+                    types);
         }
-        return departmentRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true, AccountType.USER);
+        return departmentRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
 
     @Override
@@ -361,12 +369,20 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Department> findByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception {
-        Domain domain = domainService.find(domainId);
+    public List<Department> findByDomainAndIsActive(Long userId, Boolean isActive) throws Exception {
+        User user = convertEntityService.getOwnerById(userId);
+        Domain domain = user.getDomain();
         if (domain != null && !domain.getName().equals("ROOT")) {
-            return (List<Department>) departmentRepo.findByDomainAndIsActive(domain.getId(), isActive, AccountType.USER);
+            List<AccountType> types = new ArrayList<AccountType>();
+            if (user.getType() == User.UserType.USER) {
+                types.add(Department.AccountType.USER);
+            } else {
+                types.add(Department.AccountType.USER);
+                types.add(Department.AccountType.DOMAIN_ADMIN);
+            }
+            return (List<Department>) departmentRepo.findByDomainAndIsActive(domain.getId(), isActive, types);
         }
-        return departmentRepo.findAllByIsActive(isActive, AccountType.USER);
+        return departmentRepo.findAllByIsActive(isActive);
     }
 
     @Override
@@ -417,12 +433,18 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Department> findAllByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception {
-        return (List<Department>) departmentRepo.findByDomainAndIsActive(domainId, isActive, AccountType.USER);
+        List<AccountType> types = new ArrayList<AccountType>();
+        types.add(Department.AccountType.USER);
+        types.add(Department.AccountType.DOMAIN_ADMIN);
+        types.add(Department.AccountType.ROOT_ADMIN);
+        return (List<Department>) departmentRepo.findByDomainAndIsActive(domainId, isActive, types);
     }
 
     @Override
     public List<Department> findAllByDomainAccountTypeAndIsActive(Long domainId, Boolean isActive, AccountType domainAdmin) throws Exception {
-        return (List<Department>) departmentRepo.findByDomainAndIsActive(domainId, isActive, AccountType.DOMAIN_ADMIN);
+        List<AccountType> types = new ArrayList<AccountType>();
+        types.add(Department.AccountType.DOMAIN_ADMIN);
+        return (List<Department>) departmentRepo.findByDomainAndIsActive(domainId, isActive, types);
     }
 
     /**
@@ -465,11 +487,19 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public Page<Department> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText, Long userId) throws Exception {
-        Domain domain = convertEntityService.getOwnerById(userId).getDomain();
+        User user = convertEntityService.getOwnerById(userId);
+        Domain domain = user.getDomain();
         if (domain != null && !domain.getName().equals("ROOT")) {
-            return departmentRepo.findDomainBySearchText(domain.getId(), pagingAndSorting.toPageRequest(), AccountType.USER, searchText, true);
+            List<AccountType> types = new ArrayList<AccountType>();
+            if (user.getType() == User.UserType.USER) {
+                types.add(Department.AccountType.USER);
+            } else {
+                types.add(Department.AccountType.USER);
+                types.add(Department.AccountType.DOMAIN_ADMIN);
+            }
+            return departmentRepo.findDomainBySearchTextWithType(domain.getId(), pagingAndSorting.toPageRequest(), types, searchText, true);
         }
-        return departmentRepo.findDomainBySearchText(domainId, pagingAndSorting.toPageRequest(), AccountType.USER, searchText, true);
+        return departmentRepo.findDomainBySearchText(domainId, pagingAndSorting.toPageRequest(), searchText, true);
     }
 
 }
