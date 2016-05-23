@@ -367,20 +367,22 @@ public class VPCServiceImpl implements VPCService {
                         .findByDepartmentAndResourceType(vpc.getDepartmentId(), ResourceType.Instance, true);
                 ResourceLimitProject projectLimit = resourceLimitProjectService
                         .findByProjectAndResourceType(vpc.getProjectId(), ResourceLimitProject.ResourceType.Instance, true);
-                if (departmentLimit != null && convertEntityService.getDepartmentById(vpc.getDepartmentId()).getType()
-                        .equals(AccountType.USER)) {
-                    if (vpc.getProjectId() != null) {
-                        if (projectLimit != null) {
-                            quotaLimitValidation.QuotaLimitCheckByResourceObject(vpc, CS_VPC,
-                                    vpc.getProjectId(), "Project");
+                if (departmentLimit != null) {
+                    if (!convertEntityService.getDepartmentById(vpc.getDepartmentId()).getType()
+                            .equals(AccountType.ROOT_ADMIN)) {
+                        if (vpc.getProjectId() != null) {
+                            if (projectLimit != null) {
+                                quotaLimitValidation.QuotaLimitCheckByResourceObject(vpc, CS_VPC,
+                                        vpc.getProjectId(), "Project");
+                            } else {
+                                errors.addGlobalError(
+                                        "Resource limit for project has not been set. Please update project quota");
+                                throw new ApplicationException(errors);
+                            }
                         } else {
-                            errors.addGlobalError(
-                                    "Resource limit for project has not been set. Please update project quota");
-                            throw new ApplicationException(errors);
+                            quotaLimitValidation.QuotaLimitCheckByResourceObject(vpc, CS_VPC,
+                                    vpc.getDepartmentId(), "Department");
                         }
-                    } else {
-                        quotaLimitValidation.QuotaLimitCheckByResourceObject(vpc, CS_VPC,
-                                vpc.getDepartmentId(), "Department");
                     }
                     try {
                         config.setUserServer();
@@ -402,8 +404,11 @@ public class VPCServiceImpl implements VPCService {
                     return vpcRepository.save(vpc);
 
                 } else {
-                    errors.addGlobalError(
-                            "Resource limit for department has not been set. Please update department quota");
+                    if (!convertEntityService.getDepartmentById(vpc.getDepartmentId()).getType()
+                            .equals(AccountType.ROOT_ADMIN)) {
+                        errors.addGlobalError(
+                                "Resource limit for department has not been set. Please update department quota");
+                    }
                     throw new ApplicationException(errors);
                 }
             }

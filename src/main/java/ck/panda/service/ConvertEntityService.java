@@ -1421,17 +1421,30 @@ public class ConvertEntityService {
                     appProjectResource.setIsSyncFlag(false);
                     resourceProjectService.update(appProjectResource);
                 }
-                if (resourceCountArrayJSON.getJSONObject(i).has(CloudStackConstants.CS_ACCOUNT) && !resourceCountArrayJSON.getJSONObject(i).has(CloudStackConstants.CS_PROJECT_ID)) {
-                    String account = resourceCountArrayJSON.getJSONObject(i)
-                            .getString(CloudStackConstants.CS_ACCOUNT);
+                if (resourceCountArrayJSON.getJSONObject(i).has(CloudStackConstants.CS_ACCOUNT)
+                        && !resourceCountArrayJSON.getJSONObject(i).has(CloudStackConstants.CS_PROJECT_ID)) {
+                    String account = resourceCountArrayJSON.getJSONObject(i).getString(CloudStackConstants.CS_ACCOUNT);
                     String domainId = resourceCountArrayJSON.getJSONObject(i)
                             .getString(CloudStackConstants.CS_DOMAIN_ID);
                     // Get all the resource objects from application.
-                    ResourceLimitDepartment appDepartmentResource = resourceLimitDepartmentService.findByDepartmentAndResourceType(getDepartmentByUsernameAndDomains(account, getDomain(domainId)), ResourceLimitDepartment.ResourceType.valueOf(getResourceTypeValue().get(resourceType)), true);
-                    appDepartmentResource.setUsedLimit(Long.parseLong(resourceCount));
-                    appDepartmentResource.setMax(Long.parseLong(resourceCount));
-                    appDepartmentResource.setIsSyncFlag(false);
-                    resourceLimitDepartmentService.update(appDepartmentResource);
+                    Department department = departmentService
+                            .find(getDepartmentByUsernameAndDomains(account, getDomain(domainId)));
+                    if (department != null) {
+                        ResourceLimitDepartment appDepartmentResource = resourceLimitDepartmentService
+                                .findByDepartmentAndResourceType(department.getId(),
+                                        ResourceLimitDepartment.ResourceType
+                                                .valueOf(getResourceTypeValue().get(resourceType)),
+                                        true);
+                        if (department.getType().equals(Department.AccountType.ROOT_ADMIN)) {
+                            appDepartmentResource.setUsedLimit(-1L);
+                            appDepartmentResource.setMax(-1L);
+                        } else {
+                            appDepartmentResource.setUsedLimit(Long.parseLong(resourceCount));
+                            appDepartmentResource.setMax(Long.parseLong(resourceCount));
+                        }
+                        appDepartmentResource.setIsSyncFlag(false);
+                        resourceLimitDepartmentService.update(appDepartmentResource);
+                    }
                 }
             }
         }
