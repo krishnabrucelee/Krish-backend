@@ -8,6 +8,8 @@ import ck.panda.SimpleCORSFilter;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.RolePrincipal;
+import ck.panda.domain.entity.ThemeSetting;
+import ck.panda.service.ThemeSettingService;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.error.MessageByLocaleService;
 import ck.panda.util.infrastructure.AuthenticatedExternalWebService;
@@ -115,6 +117,9 @@ public class AuthenticationFilter extends GenericFilterBean {
     /** Message properties service attribute. */
     private MessageByLocaleService messageByLocaleService;
 
+    /** Theme Setting service attribute. */
+    private ThemeSettingService themeSettingService;
+
     /**
      * Parameterized constructor.
      *
@@ -123,10 +128,11 @@ public class AuthenticationFilter extends GenericFilterBean {
      * @param messageByLocaleService to set
      */
     public AuthenticationFilter(DatabaseAuthenticationManager databaseAuthenticationManager,
-            TokenDetails userTokenDetails, MessageByLocaleService messageByLocaleService) {
+            TokenDetails userTokenDetails, MessageByLocaleService messageByLocaleService, ThemeSettingService themeSettingService) {
         this.databaseAuthenticationManager = databaseAuthenticationManager;
         this.userTokenDetails = userTokenDetails;
         this.messageByLocaleService = messageByLocaleService;
+        this.themeSettingService = themeSettingService;
     }
 
     @Override
@@ -154,6 +160,14 @@ public class AuthenticationFilter extends GenericFilterBean {
                 SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
             }
             if (resourcePath.contains(SimpleCORSFilter.RESOURCES)) {
+                LOGGER.debug("Trying to authenticate user by x-auth-token method : ", token);
+                ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
+                AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(
+                        "pandasocket", null, AuthorityUtils.commaSeparatedStringToAuthorityList(DatabaseAuthenticationManager.BACKEND_ADMIN));
+                authenticatedExternalWebService.setExternalWebService(externalWebService);
+                SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
+            }
+            if (resourcePath.contains(SimpleCORSFilter.HOME)) {
                 LOGGER.debug("Trying to authenticate user by x-auth-token method : ", token);
                 ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
                 AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(
