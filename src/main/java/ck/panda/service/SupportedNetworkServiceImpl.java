@@ -122,8 +122,11 @@ public class SupportedNetworkServiceImpl implements SupportedNetworkService {
                 if (supportedNetworkListJSON.getJSONObject(i).has(CS_PROVIDER)) {
                     for (int j = 0; j < supportedNetworkListJSON.getJSONObject(i).getJSONArray(CS_PROVIDER).length(); j++) {
                         JSONObject providerResponseObject = (JSONObject) supportedNetworkListJSON.getJSONObject(i).getJSONArray(CS_PROVIDER).get(j);
-                        if (networkServiceProviderService.findByName(providerResponseObject.getString(CloudStackConstants.CS_NAME)) != null) {
-                            providerList.add(networkServiceProviderService.findByName(providerResponseObject.getString(CloudStackConstants.CS_NAME)).getUuid().toString());
+                        if (providerResponseObject.has(CloudStackConstants.CS_PHYSICAL_NETWORK_ID) && networkServiceProviderService.findByNameAndPhysicalNetworkId(providerResponseObject.getString(CloudStackConstants.CS_NAME),
+                                providerResponseObject.getLong(CloudStackConstants.CS_PHYSICAL_NETWORK_ID)) != null) {
+                            providerList.add(networkServiceProviderService.findByNameAndPhysicalNetworkId(providerResponseObject.getString(CloudStackConstants.CS_NAME), providerResponseObject.getLong(CloudStackConstants.CS_PHYSICAL_NETWORK_ID)).getUuid().toString());
+                        } else if (networkServiceProviderService.findByName(providerResponseObject.getString(CloudStackConstants.CS_NAME)).size() > 0) {
+                            providerList.add(networkServiceProviderService.findByName(providerResponseObject.getString(CloudStackConstants.CS_NAME)).get(0).getUuid().toString());
                         }
 
                     }

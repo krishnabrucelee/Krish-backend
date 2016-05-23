@@ -27,41 +27,50 @@ import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonValidator;
 
 /**
- * Get the network service provider service list from cloud stack server and push into the application database.
+ * Get the physical networks service list from cloud stack server and push into the application database.
  *
  */
 @Entity
-@Table(name = "network_service_provider")
+@Table(name = "physical_network")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
-public class NetworkServiceProvider implements Serializable {
+public class PhysicalNetwork implements Serializable {
 
-    /** Id of the network service provider. */
+    /** Id of the physical network. */
     @Id
     @GeneratedValue
     @Column(name = "id")
     private Long id;
 
-    /** Unique id of the network service provider. */
+    /** Unique id of the physical network. */
     @Column(name = "uuid")
     private String uuid;
 
-    /** Name of the network service provider. */
+    /** Name of the physical network. */
     @Column(name = "name", nullable = false)
     private String name;
 
-    /** Status of the network service provider. */
+    /** Status of the physical network. */
     @Column(name = "status")
     private Status status;
 
-    /** Physical network Object for the network service provider. */
-    @JoinColumn(name = "physical_network_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    /** Domain Object for the physical network. */
+    @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
-    private PhysicalNetwork physicalNetwork;
+    private Domain domain;
 
-    /** id for the physical network. */
-    @Column(name = "physical_network_id")
-    private Long physicalNetworkId;
+    /** id for the Domain. */
+    @Column(name = "domain_id")
+    private Long domainId;
+
+    /** Physical network zone. */
+    @ManyToOne
+    @JoinColumn(name = "zone_id", referencedColumnName = "id", updatable = false, insertable = false)
+    private Zone zone;
+
+    /** Physical network zone id. */
+    @Column(name = "zone_id")
+    private Long zoneId;
 
     /** Version attribute to handle optimistic locking. */
     @Version
@@ -92,9 +101,13 @@ public class NetworkServiceProvider implements Serializable {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
 
-    /** Physical network transient. */
+    /** Physical network zone transient. */
     @Transient
-    private String transPhysicalNetwork;
+    private String transZone;
+
+    /** Physical network domain transient. */
+    @Transient
+    private String transDomain;
 
     /**
      * Get the id.
@@ -169,39 +182,75 @@ public class NetworkServiceProvider implements Serializable {
     }
 
     /**
-     * Get the physical network.
+     * Get the domain.
      *
-     * @return the physicalNetwork
+     * @return the domain
      */
-    public PhysicalNetwork getPhysicalNetwork() {
-        return physicalNetwork;
+    public Domain getDomain() {
+        return domain;
     }
 
     /**
-     * Set the physical network.
+     * Set the domain.
      *
-     * @param physicalNetwork to set
+     * @param domain to set
      */
-    public void setPhysicalNetwork(PhysicalNetwork physicalNetwork) {
-        this.physicalNetwork = physicalNetwork;
+    public void setDomain(Domain domain) {
+        this.domain = domain;
     }
 
     /**
-     * Get the physical network id.
+     * Get the domain id.
      *
-     * @return the physicalNetworkId
+     * @return the domain id
      */
-    public Long getPhysicalNetworkId() {
-        return physicalNetworkId;
+    public Long getDomainId() {
+        return domainId;
     }
 
     /**
-     * Set the physical network id.
+     * Set the domain id.
      *
-     * @param physicalNetworkId to set
+     * @param domainId to set
      */
-    public void setPhysicalNetworkId(Long physicalNetworkId) {
-        this.physicalNetworkId = physicalNetworkId;
+    public void setDomainId(Long domainId) {
+        this.domainId = domainId;
+    }
+
+    /**
+     * Get the zone.
+     *
+     * @return the zone
+     */
+    public Zone getZone() {
+        return zone;
+    }
+
+    /**
+     * Set the zone.
+     *
+     * @param zone to set
+     */
+    public void setZone(Zone zone) {
+        this.zone = zone;
+    }
+
+    /**
+     * Get the zone id.
+     *
+     * @return the zone id
+     */
+    public Long getZoneId() {
+        return zoneId;
+    }
+
+    /**
+     * Set the zone id.
+     *
+     * @param zoneId to set
+     */
+    public void setZoneId(Long zoneId) {
+        this.zoneId = zoneId;
     }
 
     /**
@@ -295,58 +344,77 @@ public class NetworkServiceProvider implements Serializable {
     }
 
     /**
-     * Get the transient physical network.
+     * Get the transient zone name.
      *
-     * @return transPhysicalNetwork
+     * @return transZone
      */
-    public String getTransPhysicalNetwork() {
-        return transPhysicalNetwork;
+    public String getTransZone() {
+        return transZone;
     }
 
     /**
-     * Set the transient physical network.
+     * Set the transient zone name.
      *
-     * @param transPhysicalNetwork to set
+     * @param transZone to set
      */
-    public void setTransPhysicalNetwork(String transPhysicalNetwork) {
-        this.transPhysicalNetwork = transPhysicalNetwork;
+    public void setTransZone(String transZone) {
+        this.transZone = transZone;
     }
 
-    /** Enumeration status for network service provider. */
+    /**
+     * Get the transient domain name.
+     *
+     * @return transDomain
+     */
+    public String getTransDomain() {
+        return transDomain;
+    }
+
+    /**
+     * Set the transient domain name.
+     *
+     * @param transDomain to set
+     */
+    public void setTransDomain(String transDomain) {
+        this.transDomain = transDomain;
+    }
+
+    /** Enumeration status for physical network. */
     public enum Status {
-        /** Disabled status make network service provider as soft deleted and it will not list on the applicaiton. */
+        /** Disabled status make physical network as soft deleted and it will not list on the applicaiton. */
         DISABLED,
-        /** Enabled status is used to list network service provider through out the application. */
+        /** Enabled status is used to list physical network through out the application. */
         ENABLED
     }
 
     /**
-     * Convert JSONObject to network service provider entity.
+     * Convert JSONObject to physical network entity.
      *
      * @param object json object
-     * @return network service provider entity objects
+     * @return physical network entity objects
      * @throws Exception unhandled errors.
      */
-    public static NetworkServiceProvider convert(JSONObject object) throws Exception {
-        NetworkServiceProvider networkServiceProvider = new NetworkServiceProvider();
-        networkServiceProvider.setUuid(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ID));
-        networkServiceProvider.setName(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_NAME));
-        networkServiceProvider.setTransPhysicalNetwork(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_PHYSICAL_NETWORK_ID));
-        networkServiceProvider.setStatus(Status.ENABLED);
-        return networkServiceProvider;
+    public static PhysicalNetwork convert(JSONObject object) throws Exception {
+        PhysicalNetwork physicalNetwork = new PhysicalNetwork();
+        physicalNetwork.setUuid(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ID));
+        physicalNetwork.setName(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_NAME));
+        physicalNetwork.setTransDomain(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_DOMAIN_ID));
+        physicalNetwork.setTransZone(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ZONE_ID));
+        physicalNetwork.setStatus(Status.ENABLED);
+        return physicalNetwork;
     }
 
     /**
-     * Mapping network service provider entity object in list.
+     * Mapping physical network entity object in list.
      *
-     * @param networkServiceProviderList list of network service providers
-     * @return network service provider mapped values.
+     * @param physicalNetworkList list of physical networks
+     * @return physical network mapped values.
      */
-    public static Map<String, NetworkServiceProvider> convert(List<NetworkServiceProvider> networkServiceProviderList) {
-        Map<String, NetworkServiceProvider> networkServiceProviderMap = new HashMap<String, NetworkServiceProvider>();
-        for (NetworkServiceProvider networkServiceProvider : networkServiceProviderList) {
-            networkServiceProviderMap.put(networkServiceProvider.getUuid(), networkServiceProvider);
+    public static Map<String, PhysicalNetwork> convert(List<PhysicalNetwork> physicalNetworkList) {
+        Map<String, PhysicalNetwork> physicalNetworkMap = new HashMap<String, PhysicalNetwork>();
+        for (PhysicalNetwork physicalNetwork : physicalNetworkList) {
+            physicalNetworkMap.put(physicalNetwork.getUuid(), physicalNetwork);
         }
-        return networkServiceProviderMap;
+        return physicalNetworkMap;
     }
 }

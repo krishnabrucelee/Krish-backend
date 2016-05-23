@@ -1,5 +1,6 @@
 package ck.panda.domain.repository.jpa;
 
+import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -20,11 +21,21 @@ public interface NetworkServiceProviderRepository extends PagingAndSortingReposi
     NetworkServiceProvider findByUuid(@Param("uuid") String uuid);
 
     /**
+     * Find network service provider by name and physical network id.
+     *
+     * @param name network service provider name.
+     * @param physicalNetworkId physical network id
+     * @return network service provider
+     */
+    @Query(value = "SELECT networkServiceProvider FROM NetworkServiceProvider networkServiceProvider WHERE networkServiceProvider.name =:name AND networkServiceProvider.physicalNetworkId =:physicalNetworkId")
+    NetworkServiceProvider findByNameAndPhysicalNetworkId(@Param("name") String name, @Param("physicalNetworkId") Long physicalNetworkId);
+
+    /**
      * Find network service provider by name.
      *
      * @param name network service provider name.
-     * @return network service provider
+     * @return network service provider list
      */
     @Query(value = "SELECT networkServiceProvider FROM NetworkServiceProvider networkServiceProvider WHERE networkServiceProvider.name =:name")
-    NetworkServiceProvider findByName(@Param("name") String name);
+    List<NetworkServiceProvider> findByName(@Param("name") String name);
 }

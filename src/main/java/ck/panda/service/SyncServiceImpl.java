@@ -46,6 +46,7 @@ import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.Permission;
+import ck.panda.domain.entity.PhysicalNetwork;
 import ck.panda.domain.entity.Pod;
 import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.entity.PrimaryStorage;
@@ -345,7 +346,11 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private SecondaryStorageService secondaryStorageService;
 
+    /** Network service provider reference. */
     @Autowired
+    private PhysicalNetworkService physicalNetworkService;
+
+     @Autowired
     private VPNCustomerGatewayService vpnGatewayService;
 
     /** Permission instance properties. */
@@ -654,210 +659,216 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.error("ERROR AT synch OS Types", e);
         }
         try {
-            // 14. Sync network service provider entity
+            // 14. Sync physical network entity
+            this.syncPhysicalNetwork();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC offering", e);
+        }
+        try {
+            // 15. Sync network service provider entity
             this.syncNetworkServiceProvider();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch VPC offering", e);
         }
         try {
-            // 15. Sync supported network entity
+            // 16. Sync supported network entity
             this.syncSupportedNetwork();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch VPC offering", e);
         }
         try {
-            // 16. Sync Network offering entity
+            // 17. Sync Network offering entity
             this.syncNetworkOffering();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch NetworkOffering", e);
         }
         try {
-            // 17. Sync Compute Offering entity
+            // 18. Sync Compute Offering entity
             this.syncComputeOffering();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Compute Offering", e);
         }
         try {
-            // 18. Sync Storage offering entity
+            // 19. Sync Storage offering entity
             this.syncStorageOffering();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Storage Offering", e);
         }
         try {
-            // 19. Sync Iso entity
+            // 20. Sync Iso entity
             this.syncIso();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Iso", e);
         }
         try {
-            // 20. Sync VPC offering entity
+            // 21. Sync VPC offering entity
             this.syncVpcOffering();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch VPC offering", e);
         }
         try {
-            // 21. Sync VPC entity
+            // 22. Sync VPC entity
             this.syncVpc();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch VPC", e);
         }
         try {
-            // 22. Sync VPC ACL entity
+            // 23. Sync VPC ACL entity
             this.syncVpcAcl();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch VPC ACL", e);
         }
         try {
-            // 23. Sync Network entity
+            // 24. Sync Network entity
             this.syncNetwork();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Network ", e);
         }
         try {
-            // 24. Sync Templates entity
+            // 25. Sync Templates entity
             this.syncTemplates();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Templates", e);
         }
         try {
-            // 25. Sync SSHKey entity
+            // 26. Sync SSHKey entity
             this.syncSSHKey();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch SSH Key", e);
         }
         try {
-            // 26. Sync ResourceLimit entity
-           // this.syncResourceLimit();
+            // 27. Sync ResourceLimit entity
+            this.syncResourceLimit();
         } catch (Exception e) {
             LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
         }
         try {
-            // 27. Sync Instance entity
+            // 28. Sync Instance entity
             this.syncInstances();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Instance", e);
         }
         try {
-            // 28. Sync Volume entity
+            // 29. Sync Volume entity
             this.syncVolume();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Volume", e);
         }
         try {
-            // 29. Sync VmSnapshot entity
+            // 30. Sync VmSnapshot entity
             this.syncVmSnapshots();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch vm snapshots", e);
         }
         try {
-            // 30. Sync Snapshot entity
+            // 31. Sync Snapshot entity
             this.syncSnapshot();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Snapshot", e);
         }
         try {
-            // 31. Sync Nic entity
+            // 32. Sync Nic entity
             this.syncNic();
             LOGGER.debug("nic");
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Nic", e);
         }
         try {
-            // 32. Sync IP address entity
+            // 33. Sync IP address entity
             this.syncIpAddress();
             LOGGER.debug("ipAddress");
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Ip Address", e);
         }
         try {
-            // 33. Sync Egress firewall rules entity
+            // 34. Sync Egress firewall rules entity
             this.syncEgressFirewallRules();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch EgressRule", e);
         }
         try {
-            // 34. Sync Ingress firewall rules entity
+            // 35. Sync Ingress firewall rules entity
             this.syncIngressFirewallRules();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch EgressRule", e);
         }
         try {
-            // 35. Sync Port Forwarding entity
+            // 36. Sync Port Forwarding entity
             this.syncPortForwarding();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch PortForwarding", e);
         }
         try {
-            // 36. Sync SnapshotPolicy entity
+            // 37. Sync SnapshotPolicy entity
             this.syncSnapshotPolicy();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch SnapshotPolicy", e);
         }
         try {
-            // 37. Sync Load Balancer entity
+            // 38. Sync Load Balancer entity
             this.syncLoadBalancer();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch LoadBalancer", e);
         }
 
        try {
-            // 38. Sync Load Balancer entity
+            // 39. Sync Load Balancer entity
             this.syncLoadBalancerStickyPolicy();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch LoadBalancer", e);
         }
         try {
-            // 39. Sync for update role in user entity
+            // 40. Sync for update role in user entity
             this.syncUpdateUserRole();
         } catch (Exception e) {
             LOGGER.error("ERROR AT Sync for update role in user entity", e);
         }
         try {
-            // 40. Sync VPN user entity
+            // 41. Sync VPN user entity
             this.syncVpnUser();
             LOGGER.debug("ipAddress");
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Ip Address", e);
         }
         try {
-            // 41. Sync Load Balancer entity
+            // 42. Sync Load Balancer entity
             this.syncEventList();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Event List", e);
         }
         try {
-            // 42. Sync affinity group type
+            // 43. Sync affinity group type
             this.syncAffinityGroupType();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Affinity group type", e);
         }
         try {
-            // 43. Sync affinity group
+            // 44. Sync affinity group
             this.syncAffinityGroup();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Affinity group", e);
         }
         try {
-            // 44. Sync VPC ACL entity
+            // 45. Sync VPC ACL entity
             this.syncVpcNetworkAcl();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch VPC NETWORK ACL", e);
         }
         try {
-            // 45. Sync Secondary storage entity
+            // 46. Sync Secondary storage entity
             this.syncSecondaryStorage();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Secondary storage", e);
         }
         try {
-            // 46. Sync Primary storage entity
+            // 47. Sync Primary storage entity
             this. syncPrimaryStorage();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Primary storage", e);
         }
 
         try {
-            // 47. Sync general configuration
+            // 48. Sync general configuration
             this.syncGeneralConfiguration();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch General Configuration", e);
@@ -1185,7 +1196,7 @@ public class SyncServiceImpl implements SyncService {
             // in a hash using uuid
             if (csStorageOfferingMap.containsKey(storageOffering.getUuid())) {
                 StorageOffering csStorageOffering = csStorageOfferingMap.get(storageOffering.getUuid());
-                if (csStorageOffering.getTransDomainId() != null){
+                if (csStorageOffering.getTransDomainId() != null && convertEntityService.getDomain(csStorageOffering.getTransDomainId()) != null){
                     storageOffering.setDomainId(convertEntityService.getDomain(csStorageOffering.getTransDomainId()).getId());
                 }
 
@@ -3356,6 +3367,48 @@ public class SyncServiceImpl implements SyncService {
     }
 
     @Override
+    public void syncPhysicalNetwork() throws ApplicationException, Exception {
+
+        // 1. Get all the physical network objects from CS server as hash
+        List<PhysicalNetwork> csPhysicalNetworksList = physicalNetworkService.findAllFromCSServer();
+        HashMap<String, PhysicalNetwork> csPhysicalNetworkMap = (HashMap<String, PhysicalNetwork>) PhysicalNetwork.convert(csPhysicalNetworksList);
+
+        // 2. Get all the physical network objects from application
+        List<PhysicalNetwork> appPhysicalNetworkList = physicalNetworkService.findAll();
+
+        // 3. Iterate application physical network list
+        for (PhysicalNetwork physicalNetwork : appPhysicalNetworkList) {
+            LOGGER.debug("Total rows updated : " + (appPhysicalNetworkList.size()));
+            // 3.1 Find the corresponding CS server physical network object by finding
+            // it in a hash using uuid
+            if (csPhysicalNetworkMap.containsKey(physicalNetwork.getUuid())) {
+                PhysicalNetwork csPhysicalNetwork = csPhysicalNetworkMap.get(physicalNetwork.getUuid());
+                physicalNetwork.setUuid(csPhysicalNetwork.getUuid());
+                physicalNetwork.setName(csPhysicalNetwork.getName());
+                physicalNetwork.setStatus(csPhysicalNetwork.getStatus());
+                physicalNetwork.setDomainId(csPhysicalNetwork.getDomainId());
+                physicalNetwork.setZoneId(csPhysicalNetwork.getZoneId());
+
+                // 3.2 If found, update the physical network object in app db
+                physicalNetworkService.update(physicalNetwork);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // physical network which is not added in the app
+                csPhysicalNetworkMap.remove(physicalNetwork.getUuid());
+            } else {
+                physicalNetworkService.delete(physicalNetwork);
+            }
+        }
+        // 4. Get the remaining list of cs server hash physical network object, then
+        // iterate and
+        // add it to app db
+        for (String key : csPhysicalNetworkMap.keySet()) {
+            physicalNetworkService.save(csPhysicalNetworkMap.get(key));
+        }
+
+    }
+
+    @Override
     public void syncNetworkServiceProvider() throws ApplicationException, Exception {
 
         // 1. Get all the network service provider objects from CS server as hash
@@ -3375,6 +3428,7 @@ public class SyncServiceImpl implements SyncService {
                 networkServiceProvider.setUuid(csNetworkServiceProvider.getUuid());
                 networkServiceProvider.setName(csNetworkServiceProvider.getName());
                 networkServiceProvider.setStatus(csNetworkServiceProvider.getStatus());
+                networkServiceProvider.setPhysicalNetworkId(csNetworkServiceProvider.getPhysicalNetworkId());
 
                 // 3.2 If found, update the network service provider object in app db
                 networkServiceProviderService.update(networkServiceProvider);

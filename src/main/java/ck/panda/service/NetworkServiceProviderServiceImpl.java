@@ -31,6 +31,10 @@ public class NetworkServiceProviderServiceImpl implements NetworkServiceProvider
     @Autowired
     private CloudStackVPCService cloudStackVPCService;
 
+    /** Physical network service reference. */
+    @Autowired
+    private PhysicalNetworkService physicalNetworkService;
+
     /** Constant for list network service provider response. */
     public static final String CS_NETWORK_SERVICE_RESOPNSE = "listnetworkserviceprovidersresponse";
 
@@ -89,8 +93,8 @@ public class NetworkServiceProviderServiceImpl implements NetworkServiceProvider
                 // 2.1 Call convert by passing JSONObject to network service provider entity and Add
                 // the converted network service provider entity to list
                 NetworkServiceProvider networkServiceProvider = NetworkServiceProvider.convert(networkServiceProviderListJSON.getJSONObject(i));
+                networkServiceProvider.setPhysicalNetworkId(physicalNetworkService.findByUuid(networkServiceProvider.getTransPhysicalNetwork()).getId());
                 networkServiceProviderList.add(networkServiceProvider);
-
             }
         }
         return networkServiceProviderList;
@@ -102,8 +106,13 @@ public class NetworkServiceProviderServiceImpl implements NetworkServiceProvider
     }
 
     @Override
-    public NetworkServiceProvider findByName(String name) throws Exception {
-        return networkServiceProviderRepo.findByName(name);
+    public NetworkServiceProvider findByNameAndPhysicalNetworkId(String name, Long physicalNetworkId) throws Exception {
+        return networkServiceProviderRepo.findByNameAndPhysicalNetworkId(name, physicalNetworkId);
+    }
+
+    @Override
+    public List<NetworkServiceProvider> findByName(String name) throws Exception {
+        return (List<NetworkServiceProvider>) networkServiceProviderRepo.findByName(name);
     }
 
 }
