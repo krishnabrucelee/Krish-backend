@@ -65,6 +65,7 @@ import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.entity.VPC;
+import ck.panda.domain.entity.VPNCustomerGateway;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.rabbitmq.util.ResponseEvent;
 import ck.panda.domain.entity.VmInstance;
@@ -344,6 +345,8 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private SecondaryStorageService secondaryStorageService;
 
+    @Autowired
+    private VPNCustomerGatewayService vpnGatewayService;
 
     /** Permission instance properties. */
     @Value(value = "${permission.instance}")
@@ -724,7 +727,7 @@ public class SyncServiceImpl implements SyncService {
         }
         try {
             // 26. Sync ResourceLimit entity
-            this.syncResourceLimit();
+           // this.syncResourceLimit();
         } catch (Exception e) {
             LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
         }
@@ -3708,6 +3711,50 @@ public class SyncServiceImpl implements SyncService {
             primaryStorageService.save(csStorageMap.get(key));
         }
         updateManualSyncCount("PRIMARY_STORAGE", csPrimaryStorageList.size(), csPrimaryStorageList.size());
+    }
+
+    /**
+     * Sync with Cloud Server Secondary storage.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    @Override
+    public void syncVPNCustomerGateway() throws ApplicationException, Exception {
+
+        // 1. Get all the pod objects from CS server as hash
+        List<VPNCustomerGateway> csGatewayList = vpnGatewayService.findAllFromCSServer();
+        HashMap<String, VPNCustomerGateway> csGatewayMap = (HashMap<String, VPNCustomerGateway>) VPNCustomerGateway.convert(csGatewayList);
+
+        // 2. Get all the pod objects from application
+        List<VPNCustomerGateway> appStorageList = vpnGatewayService.findAll();
+
+        // 3. Iterate application pod list
+        for (VPNCustomerGateway gateway : appStorageList) {
+            // 3.1 Find the corresponding CS server host object by finding it in
+            // a hash using uuid
+            if (csGatewayMap.containsKey(gateway.getUuid())) {
+                VPNCustomerGateway csStorage = csGatewayMap.get(gateway.getUuid());
+                gateway.setName(csStorage.getName());
+
+                // 3.2 If found, update the pod object in app db
+                vpnGatewayService.update(gateway);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // host which is not added in the app
+                csGatewayMap.remove(gateway.getUuid());
+            } else {
+                vpnGatewayService.delete(gateway);
+            }
+
+        }
+        // 4. Get the remaining list of cs server hash user object, then iterate
+        // and
+        // add it to app db
+        for (String key : csGatewayMap.keySet()) {
+            vpnGatewayService.save(csGatewayMap.get(key));
+        }
+        //updateManualSyncCount("SECONDARY_STORAGE", csSecondaryStorageList.size(), csSecondaryStorageList.size());
     }
 
 }

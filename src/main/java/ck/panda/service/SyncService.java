@@ -444,4 +444,6 @@ public interface SyncService {
      * @throws Exception cloudstack unhandled errors.
      */
     void syncPrimaryStorage() throws ApplicationException, Exception;
+
+    void syncVPNCustomerGateway() throws ApplicationException, Exception;
 }
