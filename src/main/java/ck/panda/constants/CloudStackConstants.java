@@ -759,5 +759,7 @@ public class CloudStackConstants {
     /** Constant for scope. */
     public static final String CS_SCOPE = "scope";
 
+    /** Constant for physical network id. */
+    public static final String CS_PHYSICAL_NETWORK_ID = "physicalnetworkid";
 
 }
