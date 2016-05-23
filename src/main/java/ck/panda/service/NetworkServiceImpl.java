@@ -199,20 +199,22 @@ public class NetworkServiceImpl implements NetworkService {
                         .findByDepartmentAndResourceType(network.getDepartmentId(), ResourceType.Instance, true);
                 ResourceLimitProject projectLimit = resourceLimitProjectService
                         .findByProjectAndResourceType(network.getProjectId(), ResourceLimitProject.ResourceType.Instance, true);
-                if (departmentLimit != null && convertEntityService.getDepartmentById(network.getDepartmentId()).getType()
-                        .equals(AccountType.USER)) {
-                    if (network.getProjectId() != null) {
-                        if (projectLimit != null) {
-                            quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
-                                network.getProjectId(), "Project");
+                if (departmentLimit != null) {
+                    if (!convertEntityService.getDepartmentById(network.getDepartmentId()).getType()
+                            .equals(AccountType.ROOT_ADMIN)) {
+                        if (network.getProjectId() != null) {
+                            if (projectLimit != null) {
+                                quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
+                                        network.getProjectId(), "Project");
+                            } else {
+                                errors.addGlobalError(
+                                        "Resource limit for project has not been set. Please update project quota");
+                                throw new ApplicationException(errors);
+                            }
                         } else {
-                            errors.addGlobalError(
-                                    "Resource limit for project has not been set. Please update project quota");
-                            throw new ApplicationException(errors);
+                            quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
+                                    network.getDepartmentId(), "Department");
                         }
-                    } else {
-                        quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
-                                network.getDepartmentId(), "Department");
                     }
                     try {
                         config.setUserServer();
@@ -271,8 +273,11 @@ public class NetworkServiceImpl implements NetworkService {
                     return networkRepo.save(network);
 
                 } else {
-                    errors.addGlobalError(
-                            "Resource limit for department has not been set. Please update department quota");
+                    if (!convertEntityService.getDepartmentById(network.getDepartmentId()).getType()
+                            .equals(AccountType.ROOT_ADMIN)) {
+                        errors.addGlobalError(
+                                "Resource limit for department has not been set. Please update department quota");
+                    }
                     throw new ApplicationException(errors);
                 }
             } else {
