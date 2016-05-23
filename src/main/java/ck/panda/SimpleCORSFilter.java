@@ -35,6 +35,9 @@ public class SimpleCORSFilter implements Filter {
     /** Constant for OPTIONS. */
     public static final String OPTIONS = "OPTIONS";
 
+    /** Constant for HOME. */
+    public static final String HOME = "home";
+
     /**
      * Overriden method.
      */
@@ -56,7 +59,9 @@ public class SimpleCORSFilter implements Filter {
         }
         if (request.getRequestURI().contains(RESOURCES)) {
         }
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+        if (request.getRequestURI().contains(HOME)) {
+        }
+        if (OPTIONS.equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
         } else {
             chain.doFilter(req, res);

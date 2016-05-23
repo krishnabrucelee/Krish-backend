@@ -76,7 +76,9 @@ public class ThemeSettingController extends CRUDController<ThemeSetting> impleme
             @RequestParam(value="backgroundImageFile") MultipartFile[] backgroundImageFile,
             @RequestParam(value="logoImageFile") MultipartFile[] logoImageFile,
             @RequestParam(value="headers") String headers,
-            @RequestParam(value = "footers") String footers)
+            @RequestParam(value = "footers") String footers,
+            @RequestParam(value="welcomeContent") String welcomeContent,
+            @RequestParam(value = "footerContent") String footerContent)
                     throws Exception {
         InputStream inputStream = null;
         OutputStream outputStream = null;
@@ -156,6 +158,12 @@ public class ThemeSettingController extends CRUDController<ThemeSetting> impleme
                     }
                 }
             }
+        }
+        if (welcomeContent != null) {
+            theme.setWelcomeContent(welcomeContent);
+        }
+        if (footerContent != null) {
+            theme.setFooterContent(footerContent);
         }
         theme.setIsActive(true);
         themeSettingService.saveThemeCustomisation(theme, headers, footers);
