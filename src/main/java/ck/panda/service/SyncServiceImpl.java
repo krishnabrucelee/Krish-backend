@@ -46,6 +46,7 @@ import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.Permission;
+import ck.panda.domain.entity.PhysicalNetwork;
 import ck.panda.domain.entity.Pod;
 import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.entity.PrimaryStorage;
@@ -343,6 +344,10 @@ public class SyncServiceImpl implements SyncService {
     /** Secondary secondary reference. */
     @Autowired
     private SecondaryStorageService secondaryStorageService;
+
+    /** Network service provider reference. */
+    @Autowired
+    private PhysicalNetworkService physicalNetworkService;
 
 
     /** Permission instance properties. */
@@ -649,6 +654,12 @@ public class SyncServiceImpl implements SyncService {
             this.syncOsTypes();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch OS Types", e);
+        }
+        try {
+            // 14. Sync network service provider entity
+            this.syncPhysicalNetwork();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC offering", e);
         }
         try {
             // 14. Sync network service provider entity
@@ -3353,6 +3364,48 @@ public class SyncServiceImpl implements SyncService {
     }
 
     @Override
+    public void syncPhysicalNetwork() throws ApplicationException, Exception {
+
+        // 1. Get all the physical network objects from CS server as hash
+        List<PhysicalNetwork> csPhysicalNetworksList = physicalNetworkService.findAllFromCSServer();
+        HashMap<String, PhysicalNetwork> csPhysicalNetworkMap = (HashMap<String, PhysicalNetwork>) PhysicalNetwork.convert(csPhysicalNetworksList);
+
+        // 2. Get all the physical network objects from application
+        List<PhysicalNetwork> appPhysicalNetworkList = physicalNetworkService.findAll();
+
+        // 3. Iterate application physical network list
+        for (PhysicalNetwork physicalNetwork : appPhysicalNetworkList) {
+            LOGGER.debug("Total rows updated : " + (appPhysicalNetworkList.size()));
+            // 3.1 Find the corresponding CS server physical network object by finding
+            // it in a hash using uuid
+            if (csPhysicalNetworkMap.containsKey(physicalNetwork.getUuid())) {
+                PhysicalNetwork csPhysicalNetwork = csPhysicalNetworkMap.get(physicalNetwork.getUuid());
+                physicalNetwork.setUuid(csPhysicalNetwork.getUuid());
+                physicalNetwork.setName(csPhysicalNetwork.getName());
+                physicalNetwork.setStatus(csPhysicalNetwork.getStatus());
+                physicalNetwork.setDomainId(csPhysicalNetwork.getDomainId());
+                physicalNetwork.setZoneId(csPhysicalNetwork.getZoneId());
+
+                // 3.2 If found, update the physical network object in app db
+                physicalNetworkService.update(physicalNetwork);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // physical network which is not added in the app
+                csPhysicalNetworkMap.remove(physicalNetwork.getUuid());
+            } else {
+                physicalNetworkService.delete(physicalNetwork);
+            }
+        }
+        // 4. Get the remaining list of cs server hash physical network object, then
+        // iterate and
+        // add it to app db
+        for (String key : csPhysicalNetworkMap.keySet()) {
+            physicalNetworkService.save(csPhysicalNetworkMap.get(key));
+        }
+
+    }
+
+    @Override
     public void syncNetworkServiceProvider() throws ApplicationException, Exception {
 
         // 1. Get all the network service provider objects from CS server as hash
@@ -3372,6 +3425,7 @@ public class SyncServiceImpl implements SyncService {
                 networkServiceProvider.setUuid(csNetworkServiceProvider.getUuid());
                 networkServiceProvider.setName(csNetworkServiceProvider.getName());
                 networkServiceProvider.setStatus(csNetworkServiceProvider.getStatus());
+                networkServiceProvider.setPhysicalNetworkId(csNetworkServiceProvider.getPhysicalNetworkId());
 
                 // 3.2 If found, update the network service provider object in app db
                 networkServiceProviderService.update(networkServiceProvider);

@@ -444,4 +444,12 @@ public interface SyncService {
      * @throws Exception cloudstack unhandled errors.
      */
     void syncPrimaryStorage() throws ApplicationException, Exception;
+
+    /**
+     * Sync with Cloud physical network.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    void syncPhysicalNetwork() throws ApplicationException, Exception;
 }
