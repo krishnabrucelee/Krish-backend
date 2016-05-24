@@ -68,7 +68,7 @@ public class DepartmentController extends CRUDController<Department> implements 
     @Override
     public Department update(@RequestBody Department department, @PathVariable(PATH_ID) Long id) throws Exception {
         department.setSyncFlag(true);
-        return departmentService.update(department);
+        return departmentService.update(department,Long.parseLong(tokenDetails.getTokenDetails("id")));
     }
 
     /**

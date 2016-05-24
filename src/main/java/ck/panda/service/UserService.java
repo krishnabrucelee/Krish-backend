@@ -331,4 +331,23 @@ public interface UserService extends CRUDService<User> {
      */
     List<User> findBySync() throws Exception;
 
+    /**
+     * User update with id.
+     *
+     * @param user id of the user.
+     * @param id of the session.
+     * @return user.
+     * @throws Exception if error occurs.
+     */
+    User update(User user, Long id) throws Exception;
+
+    /**
+     * Soft delete for user with id.
+     *
+     * @param user id of the user.
+     * @param id of the session.
+     * @return user.
+     * @throws Exception if error occurs.
+     */
+    User softDelete(User user, Long id) throws Exception;
 }

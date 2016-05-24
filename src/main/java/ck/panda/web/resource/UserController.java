@@ -62,7 +62,7 @@ public class UserController extends CRUDController<User> implements ApiControlle
     @Override
     public User update(@RequestBody User user, @PathVariable(PATH_ID) Long id) throws Exception {
         user.setSyncFlag(true);
-        return userService.update(user);
+        return userService.update(user, Long.parseLong(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
     }
 
     /**
@@ -92,7 +92,7 @@ public class UserController extends CRUDController<User> implements ApiControlle
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody User user) throws Exception {
         user.setSyncFlag(true);
-        userService.softDelete(user);
+        userService.softDelete(user,Long.parseLong(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
     }
 
     @Override

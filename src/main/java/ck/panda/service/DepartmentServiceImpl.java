@@ -145,15 +145,26 @@ public class DepartmentServiceImpl implements DepartmentService {
             HashMap<String, String> accountMap = new HashMap<String, String>();
             accountMap.put(CloudStackConstants.CS_DOMAIN_ID, String.valueOf(domain.getUuid()));
             //TODO : This will be the hardcoded values for the dummy user after creating department it will remove from the cloudstack.
-            config.setServer(1L);
-            String createAccountResponse = csAccountService.createAccount(
+            // set server for finding value in configuration
+            if ((convertEntityService.getOwnerById(userId).getType()).equals(User.UserType.ROOT_ADMIN)) {
+                config.setUserServer();
+            }
+            else {
+                config.setServer(1L);
+            }
+                    String createAccountResponse = csAccountService.createAccount(
                     String.valueOf(CloudStackConstants.CS_USER_TYPE), "test@test.com", "first", "last",
                     department.getUserName(), "test", CloudStackConstants.JSON, accountMap);
 
             JSONObject createAccountResponseJSON = new JSONObject(createAccountResponse)
                     .getJSONObject(CloudStackConstants.CS_ACCOUNT_RESPONSE).getJSONObject(CloudStackConstants.CS_ACCOUNT);
             JSONObject userObj = createAccountResponseJSON.getJSONArray(CloudStackConstants.CS_USER).getJSONObject(0);
-            config.setServer(1L);
+            if ((convertEntityService.getOwnerById(userId).getType()).equals(User.UserType.ROOT_ADMIN)) {
+                config.setUserServer();
+            }
+            else {
+                config.setServer(1L);
+            }
             csUserService.deleteUser(userObj.getString(CloudStackConstants.CS_ID), CloudStackConstants.JSON);
             department.setUuid((String) createAccountResponseJSON.get(CloudStackConstants.CS_ID));
             LOGGER.debug("Department created successfully" + department.getUserName());
@@ -207,7 +218,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     @PreAuthorize("hasPermission(#department.getSyncFlag(), 'EDIT_DEPARTMENT')")
-    public Department update(Department department) throws Exception {
+    public Department update(Department department, Long id) throws Exception {
         if (department.getSyncFlag()) {
             // Validate department
             this.validateDepartment(department);
@@ -217,8 +228,13 @@ public class DepartmentServiceImpl implements DepartmentService {
             HashMap<String, String> accountMap = new HashMap<String, String>();
             accountMap.put(CloudStackConstants.CS_DOMAIN_ID, domain.getUuid());
             accountMap.put(CloudStackConstants.CS_ACCOUNT, departmentedit.getUserName());
-            config.setServer(1L);
-            csAccountService.updateAccount(department.getUserName(), accountMap);
+            // set server for finding value in configuration
+            if ((convertEntityService.getOwnerById(id).getType()).equals(User.UserType.ROOT_ADMIN)) {
+                config.setUserServer();
+            }
+            else {
+                config.setServer(1L);
+            }            csAccountService.updateAccount(department.getUserName(), accountMap);
             LOGGER.debug("Department updated successfully" + department.getUserName());
             saveDepartmentToPingProject(department);
         }
@@ -500,6 +516,14 @@ public class DepartmentServiceImpl implements DepartmentService {
             return departmentRepo.findDomainBySearchTextWithType(domain.getId(), pagingAndSorting.toPageRequest(), types, searchText, true);
         }
         return departmentRepo.findDomainBySearchText(domainId, pagingAndSorting.toPageRequest(), searchText, true);
+    }
+
+    @Override
+    public Department update(Department department) throws Exception {
+        if (!department.getSyncFlag()) {
+            return departmentRepo.save(department);
+        }
+        return department;
     }
 
 }
