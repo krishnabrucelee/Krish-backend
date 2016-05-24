@@ -2377,7 +2377,7 @@ public class SyncServiceImpl implements SyncService {
                  ResourceLimitDepartment resourceLimitDepartment = resourceDepartmentService
                          .findByDepartmentAndResourceType(department.getId(),
                                  ResourceLimitDepartment.ResourceType.valueOf(key), true);
-                 resourceLimitDepartment.setUsedLimit(-1L);
+                 resourceLimitDepartment.setUsedLimit(Long.parseLong(departmentMap.get(key)));
                  resourceLimitDepartment.setMax(-1L);
                  resourceLimitDepartment.setIsSyncFlag(false);
                  resourceDepartmentService.update(resourceLimitDepartment);

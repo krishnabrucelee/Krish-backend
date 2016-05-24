@@ -400,14 +400,15 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         // Destroys a virtual machine.
         case EventTypes.EVENT_VM_DESTROY:
             // TODO //check department and project quota validation.
-            ResourceLimitDepartment departmentsLimit = resourceLimitDepartmentService
+            /*ResourceLimitDepartment departmentsLimit = resourceLimitDepartmentService
                     .findByDepartmentAndResourceType(vmInstance.getDepartmentId(), ResourceType.Instance, true);
 
-            if (departmentsLimit != null) {
+            if (departmentsLimit != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
+                    .getType().equals(AccountType.USER)) {
                 if (vmInstance.getProjectId() != null) {
-//                    syncService
-//                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
-                }
+                    syncService
+                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
+                }*/
                 config.setUserServer();
                 instanceResponse = cloudStackInstanceService.destroyVirtualMachine(vmInstance.getUuid(),
                         CloudStackConstants.JSON, optionalMap);
@@ -417,21 +418,22 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         && !jobState.equals(GenericConstants.ERROR_JOB_STATUS)) {
                     vmInstance.setEventMessage("Vm destroyed");
                 }
-            } else {
+            /*} else {
                 throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Resource limit for department has not been set. Please update department quota");
-            }
+            }*/
             break;
         // Destroys and expunge a virtual machine.
         case EventTypes.EVENT_VM_EXPUNGE:
             // TODO //check department and project quota validation.
-            ResourceLimitDepartment departmentLimits = resourceLimitDepartmentService
+            /*ResourceLimitDepartment departmentLimits = resourceLimitDepartmentService
                     .findByDepartmentAndResourceType(vmInstance.getDepartmentId(), ResourceType.Instance, true);
 
-            if (departmentLimits != null) {
+            if (departmentLimits != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
+                    .getType().equals(AccountType.USER)) {
                 if (vmInstance.getProjectId() != null) {
-//                    syncService
-//                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
-                }
+                    syncService
+                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
+                }*/
                 optionalMap.put(CloudStackConstants.CS_VM_ENPUNGE, CloudStackConstants.CS_ACTIVE_VM);
                 config.setUserServer();
                 instanceResponse = cloudStackInstanceService.destroyVirtualMachine(vmInstance.getUuid(),
@@ -442,9 +444,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         && !jobState.equals(GenericConstants.ERROR_JOB_STATUS)) {
                     vmInstance.setEventMessage("VM EXPUNGING");
                 }
-            } else {
+            /*} else {
                 throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Resource limit for department has not been set. Please update department quota");
-            }
+            }*/
             break;
         // Creates a virtual machine.
         case EventTypes.EVENT_VM_CREATE:
