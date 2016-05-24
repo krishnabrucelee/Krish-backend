@@ -1436,12 +1436,11 @@ public class ConvertEntityService {
                                                 .valueOf(getResourceTypeValue().get(resourceType)),
                                         true);
                         if (department.getType().equals(Department.AccountType.ROOT_ADMIN)) {
-                            appDepartmentResource.setUsedLimit(-1L);
                             appDepartmentResource.setMax(-1L);
                         } else {
-                            appDepartmentResource.setUsedLimit(Long.parseLong(resourceCount));
                             appDepartmentResource.setMax(Long.parseLong(resourceCount));
                         }
+                        appDepartmentResource.setUsedLimit(Long.parseLong(resourceCount));
                         appDepartmentResource.setIsSyncFlag(false);
                         resourceLimitDepartmentService.update(appDepartmentResource);
                     }

@@ -441,21 +441,23 @@ public class VolumeServiceImpl implements VolumeService {
                 // check department and project quota validation.
                 ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
                         .findByDepartmentAndResourceType(volume.getDepartmentId(), ResourceType.Instance, true);
-                if (departmentLimit != null && convertEntityService.getDepartmentById(volume.getDepartmentId())
-                        .getType().equals(AccountType.USER)) {
-                    if (volume.getProjectId() != null) {
-//                        syncService
-//                                .syncResourceLimitProject(convertEntityService.getProjectById(volume.getProjectId()));
-                        quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "UploadVolume",
-                                volume.getProjectId(), "Project");
-                    } else {
-                        quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "UploadVolume",
-                                volume.getDepartmentId(), "Department");
+                if (departmentLimit != null) {
+                    if (!convertEntityService.getDepartmentById(volume.getDepartmentId())
+                            .getType().equals(AccountType.ROOT_ADMIN)) {
+                        if (volume.getProjectId() != null) {
+    //                        syncService
+    //                                .syncResourceLimitProject(convertEntityService.getProjectById(volume.getProjectId()));
+                            quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "UploadVolume",
+                                    volume.getProjectId(), "Project");
+                        } else {
+                            quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "UploadVolume",
+                                    volume.getDepartmentId(), "Department");
+                        }
+                        /*if (volume.getDomainId() != null) {
+                            quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "UploadVolume",
+                                    volume.getDomainId(), "Domain");
+                        }*/
                     }
-                    /*if (volume.getDomainId() != null) {
-                        quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "UploadVolume",
-                                volume.getDomainId(), "Domain");
-                    }*/
                     Volume volumeCS = upload(volume, convertEntityService.getOwnerById(userId).getDomainId(), userId,
                             errors);
                     if (errors.hasErrors()) {
