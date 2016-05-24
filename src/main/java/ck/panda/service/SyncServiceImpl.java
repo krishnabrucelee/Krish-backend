@@ -2177,26 +2177,24 @@ public class SyncServiceImpl implements SyncService {
     public void syncResourceLimit() throws ApplicationException, Exception {
         List<Department> departments = departmentService.findAllByActive(true);
         for (Department deparment : departments) {
-            if (!deparment.getType().equals(Department.AccountType.ROOT_ADMIN)) {
-                for (String key : convertEntityService.getResourceTypeValue().keySet()) {
-                    ResourceLimitDepartment persistDepartment = resourceDepartmentService
-                            .findByDepartmentAndResourceType(deparment.getId(), ResourceLimitDepartment.ResourceType
-                                    .valueOf(convertEntityService.getResourceTypeValue().get(key)), true);
-                    if (persistDepartment != null) {
-                        resourceDepartmentService.delete(persistDepartment);
-                    }
-                    ResourceLimitDepartment resourceLimitDepartment = new ResourceLimitDepartment();
-                    resourceLimitDepartment.setDepartmentId(deparment.getId());
-                    resourceLimitDepartment.setDomainId(deparment.getDomainId());
-                    resourceLimitDepartment.setMax(0L);
-                    resourceLimitDepartment.setAvailable(0L);
-                    resourceLimitDepartment.setUsedLimit(0L);
-                    resourceLimitDepartment.setResourceType(ResourceLimitDepartment.ResourceType
-                            .valueOf(convertEntityService.getResourceTypeValue().get(key)));
-                    resourceLimitDepartment.setIsSyncFlag(false);
-                    resourceLimitDepartment.setIsActive(true);
-                    resourceDepartmentService.update(resourceLimitDepartment);
+            for (String key : convertEntityService.getResourceTypeValue().keySet()) {
+                ResourceLimitDepartment persistDepartment = resourceDepartmentService
+                        .findByDepartmentAndResourceType(deparment.getId(), ResourceLimitDepartment.ResourceType
+                                .valueOf(convertEntityService.getResourceTypeValue().get(key)), true);
+                if (persistDepartment != null) {
+                    resourceDepartmentService.delete(persistDepartment);
                 }
+                ResourceLimitDepartment resourceLimitDepartment = new ResourceLimitDepartment();
+                resourceLimitDepartment.setDepartmentId(deparment.getId());
+                resourceLimitDepartment.setDomainId(deparment.getDomainId());
+                resourceLimitDepartment.setMax(0L);
+                resourceLimitDepartment.setAvailable(0L);
+                resourceLimitDepartment.setUsedLimit(0L);
+                resourceLimitDepartment.setResourceType(ResourceLimitDepartment.ResourceType
+                        .valueOf(convertEntityService.getResourceTypeValue().get(key)));
+                resourceLimitDepartment.setIsSyncFlag(false);
+                resourceLimitDepartment.setIsActive(true);
+                resourceDepartmentService.update(resourceLimitDepartment);
             }
             HashMap<String, String> departmentCountMap = new HashMap<String, String>();
             departmentCountMap.put(CloudStackConstants.CS_ACCOUNT, deparment.getUserName());
