@@ -32,9 +32,19 @@ public interface NetworkServiceProviderService extends CRUDService<NetworkServic
      * To get network service provider from cloudstack server.
      *
      * @param name of network service provider.
+     * @param physicalNetworkId physical network id
      * @return network service provider from server
      * @throws Exception unhandled errors.
      */
-    NetworkServiceProvider findByName(String name) throws Exception;
+    NetworkServiceProvider findByNameAndPhysicalNetworkId(String name, Long physicalNetworkId) throws Exception;
+
+    /**
+     * To get network service provider from cloudstack server.
+     *
+     * @param name of network service provider.
+     * @return network service provider from server
+     * @throws Exception unhandled errors.
+     */
+    List<NetworkServiceProvider> findByName(String name) throws Exception;
 
 }

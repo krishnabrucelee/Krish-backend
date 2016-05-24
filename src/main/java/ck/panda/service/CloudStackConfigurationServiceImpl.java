@@ -452,6 +452,7 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
 
         case SUPPORTEDNETWORK:
             //Sync supported network
+            syncService.syncPhysicalNetwork();
             if (type.equals(IMPORT)) {
                 syncService.syncSupportedNetwork();
             } else {
@@ -461,6 +462,7 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
 
         case NETWORKSERVICEPROVIDER:
             //Sync network service provider
+            syncService.syncPhysicalNetwork();
             if (type.equals(IMPORT)) {
                 syncService.syncNetworkServiceProvider();
             } else {

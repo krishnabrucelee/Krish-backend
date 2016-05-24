@@ -185,20 +185,22 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     vmInstance.getDepartmentId(), ResourceType.valueOf("Instance"), true);
             ResourceLimitProject projectLimit = resourceLimitProjectService
                     .findByProjectAndResourceType(vmInstance.getProjectId(), ResourceLimitProject.ResourceType.Instance, true);
-            if (departmentLimit != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
-                    .getType().equals(AccountType.USER)) {
-                if (vmInstance.getProjectId() != null) {
-                    if (projectLimit != null) {
-                        quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
-                                vmInstance.getProjectId(), "Project");
+            if (departmentLimit != null) {
+                if (!convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
+                        .getType().equals(AccountType.ROOT_ADMIN)) {
+                    if (vmInstance.getProjectId() != null) {
+                        if (projectLimit != null) {
+                            quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
+                                    vmInstance.getProjectId(), "Project");
+                        } else {
+                            errors.addGlobalError(
+                                    "Resource limit for project has not been set. Please update project quota");
+                            throw new ApplicationException(errors);
+                        }
                     } else {
-                        errors.addGlobalError(
-                                "Resource limit for project has not been set. Please update project quota");
-                        throw new ApplicationException(errors);
+                        quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
+                                vmInstance.getDepartmentId(), "Department");
                     }
-                } else {
-                    quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
-                            vmInstance.getDepartmentId(), "Department");
                 }
                 // 3. Check the resource availability to deploy new vm.
                 String isAvailable = isResourceAvailable(vmInstance, optionalMap);
@@ -273,7 +275,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 // 5.4 Save entity with CS response.
                 return virtualmachinerepository.save(convertEncryptPassword(vmInstance));
             } else {
-                errors.addGlobalError("Resource limit for department has not been set. Please update department quota");
+                if (!convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
+                        .getType().equals(AccountType.ROOT_ADMIN)) {
+                    errors.addGlobalError("Resource limit for department has not been set. Please update department quota");
+                }
                 throw new ApplicationException(errors);
             }
         }
@@ -995,34 +1000,34 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         break;
                     // 4.5 Check public ip address availability.
                     case GenericConstants.RESOURCE_IP_ADDRESS:
-						if (vm.getNetworkUuid() != null || vm.getNetworkId() != null) {
-							if (convertEntityService.getNetworkById(vm.getNetworkId()).getVpcId() == null) {
-								if (vm.getNetworkUuid() != null) {
-									optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK, vm.getNetworkUuid());
-								} else {
-									optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK,
-											convertEntityService.getNetworkById(vm.getNetworkId()).getUuid());
-								}
-								if (vm.getProjectId() != null) {
-									optionalMap.put("projectid",
-											convertEntityService.getProjectById(vm.getProjectId()).getUuid());
-								}
-								optionalMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
-								optionalMap.put(CloudStackConstants.CS_FOR_VM_NETWORK,
-										CloudStackConstants.STATUS_ACTIVE);
-								config.setServer(1L);
-								String csIpResponse = cloudStackResourceCapacity.listPublicIpAddress(optionalMap,
-										CloudStackConstants.JSON);
-								JSONObject csIpCapacity = new JSONObject(csIpResponse)
-										.getJSONObject(CloudStackConstants.CS_PUBLIC_IPADDRESS_RESPONSE);
-								if (csIpCapacity.has(CloudStackConstants.CS_CAPACITY_COUNT)) {
-									LOGGER.debug("Already IP address acquired ", resourceType);
-								} else if (resourceUsage < 1) {
-									errMessage = CloudStackConstants.RESOURCE_CHECK + " public.ip.available "
-											+ CloudStackConstants.CONTACT_CLOUD_ADMIN;
-								}
-							}
-						}
+                        if (vm.getNetworkUuid() != null || vm.getNetworkId() != null) {
+                            if (convertEntityService.getNetworkById(vm.getNetworkId()).getVpcId() == null) {
+                                if (vm.getNetworkUuid() != null) {
+                                    optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK, vm.getNetworkUuid());
+                                } else {
+                                    optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK,
+                                            convertEntityService.getNetworkById(vm.getNetworkId()).getUuid());
+                                }
+                                if (vm.getProjectId() != null) {
+                                    optionalMap.put("projectid",
+                                            convertEntityService.getProjectById(vm.getProjectId()).getUuid());
+                                }
+                                optionalMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+                                optionalMap.put(CloudStackConstants.CS_FOR_VM_NETWORK,
+                                        CloudStackConstants.STATUS_ACTIVE);
+                                config.setServer(1L);
+                                String csIpResponse = cloudStackResourceCapacity.listPublicIpAddress(optionalMap,
+                                        CloudStackConstants.JSON);
+                                JSONObject csIpCapacity = new JSONObject(csIpResponse)
+                                        .getJSONObject(CloudStackConstants.CS_PUBLIC_IPADDRESS_RESPONSE);
+                                if (csIpCapacity.has(CloudStackConstants.CS_CAPACITY_COUNT)) {
+                                    LOGGER.debug("Already IP address acquired ", resourceType);
+                                } else if (resourceUsage < 1) {
+                                    errMessage = CloudStackConstants.RESOURCE_CHECK + " public.ip.available "
+                                            + CloudStackConstants.CONTACT_CLOUD_ADMIN;
+                                }
+                            }
+                        }
                         break;
                     default:
                         LOGGER.debug("No Resource ", resourceType);

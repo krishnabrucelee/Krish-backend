@@ -18,6 +18,7 @@ import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.Domain.Status;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.User;
@@ -61,6 +62,10 @@ public class DomainServiceImpl implements DomainService {
     /** Autowired CloudStackUserService object. */
     @Autowired
     private CloudStackUserService csUserService;
+
+    /** Resource limit department service reference. */
+    @Autowired
+    private ResourceLimitDepartmentService resourceLimitDepartmentService;
 
     /** Autowired permission service. */
     @Autowired
@@ -204,6 +209,26 @@ public class DomainServiceImpl implements DomainService {
         department.setUuid((String) createDomain.get("id"));
         department.setSyncFlag(false);
         department = deptService.save(department);
+        for (String keys : convertEntityService.getResourceTypeValue().keySet()) {
+            ResourceLimitDepartment persistDepartment = resourceLimitDepartmentService.findByDepartmentAndResourceType(
+                    department.getId(),
+                    ResourceLimitDepartment.ResourceType.valueOf(convertEntityService.getResourceTypeValue().get(keys)),
+                    true);
+            if (persistDepartment != null) {
+                resourceLimitDepartmentService.delete(persistDepartment);
+            }
+            ResourceLimitDepartment resourceLimitDepartment = new ResourceLimitDepartment();
+            resourceLimitDepartment.setDepartmentId(department.getId());
+            resourceLimitDepartment.setDomainId(department.getDomainId());
+            resourceLimitDepartment.setMax(0L);
+            resourceLimitDepartment.setAvailable(0L);
+            resourceLimitDepartment.setUsedLimit(0L);
+            resourceLimitDepartment.setResourceType(ResourceLimitDepartment.ResourceType
+                    .valueOf(convertEntityService.getResourceTypeValue().get(keys)));
+            resourceLimitDepartment.setIsSyncFlag(false);
+            resourceLimitDepartment.setIsActive(true);
+            resourceLimitDepartmentService.update(resourceLimitDepartment);
+        }
         saveDepartmentToPingProject(department);
         User user = User.convert(createDomain.getJSONArray("user").getJSONObject(0));
         user.setDepartmentId(convertEntityService.getDepartmentId(user.getTransDepartment()));
@@ -494,14 +519,14 @@ public class DomainServiceImpl implements DomainService {
         return domainRepo.findDomainBySearchText(pagingAndSorting.toPageRequest(), searchText, true);
     }
 
-	@Override
-	public Domain updateSuspended(Domain domain) throws Exception {
-		Domain domains = domainRepo.findOne(domain.getId());
-		List<User> userList = userService.findAllByDomain(domains);
-		for(User user : userList) {
-			userService.updateSuspended(user);
-		}
-		domains.setStatus(Domain.Status.SUSPENDED);
-		return domainRepo.save(domains);
-	}
+    @Override
+    public Domain updateSuspended(Domain domain) throws Exception {
+        Domain domains = domainRepo.findOne(domain.getId());
+        List<User> userList = userService.findAllByDomain(domains);
+        for(User user : userList) {
+            userService.updateSuspended(user);
+        }
+        domains.setStatus(Domain.Status.SUSPENDED);
+        return domainRepo.save(domains);
+    }
 }

@@ -154,20 +154,22 @@ public class IpaddressServiceImpl implements IpaddressService {
                 convertEntityService.getNetworkById(networkId).getDepartmentId(), ResourceType.Instance, true);
         ResourceLimitProject projectLimit = resourceLimitProjectService
                 .findByProjectAndResourceType(convertEntityService.getNetworkById(networkId).getProjectId(), ResourceLimitProject.ResourceType.Instance, true);
-        if (departmentLimit != null && convertEntityService
-                .getDepartmentById(convertEntityService.getNetworkById(networkId).getDepartmentId()).getType()
-                .equals(AccountType.USER)) {
-            if (convertEntityService.getNetworkById(networkId).getProjectId() != null) {
-                if (projectLimit != null) {
-                quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getNetworkById(networkId),
-                        "IP", convertEntityService.getNetworkById(networkId).getProjectId(), "Project");
-                } else {
-                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Resource limit for project has not been set. Please update project quota");
+        if (departmentLimit != null) {
+            if (!convertEntityService
+                    .getDepartmentById(convertEntityService.getNetworkById(networkId).getDepartmentId()).getType()
+                    .equals(AccountType.ROOT_ADMIN)) {
+                if (convertEntityService.getNetworkById(networkId).getProjectId() != null) {
+                    if (projectLimit != null) {
+                    quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getNetworkById(networkId),
+                            "IP", convertEntityService.getNetworkById(networkId).getProjectId(), "Project");
+                    } else {
+                        throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Resource limit for project has not been set. Please update project quota");
+                    }
                 }
-            }
-            else {
-                quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getNetworkById(networkId),
-                        "IP", convertEntityService.getNetworkById(networkId).getDepartmentId(), "Department");
+                else {
+                    quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getNetworkById(networkId),
+                            "IP", convertEntityService.getNetworkById(networkId).getDepartmentId(), "Department");
+                }
             }
             // 3. Check the resource availability to acquire new ip.
             String isAvailable = isResourceAvailable(convertEntityService.getNetworkById(networkId), optionalMap);
@@ -631,7 +633,7 @@ public class IpaddressServiceImpl implements IpaddressService {
             configServer.setUserServer();
             ipMap.put("vmguestip", ipAddress);
             if (ipaddress.getVpcId() != null) {
-            	ipMap.put(CloudStackConstants.CS_NETWORK_ID, networkId);
+                ipMap.put(CloudStackConstants.CS_NETWORK_ID, networkId);
             }
             String enableResponse = csipaddressService.enableStaticNat(ipaddress.getUuid(), vmid, ipMap);
             JSONObject jobId = new JSONObject(enableResponse).getJSONObject("enablestaticnatresponse");
@@ -808,7 +810,7 @@ public class IpaddressServiceImpl implements IpaddressService {
                 if (ipAddress.getVpc().getProject() != null) {
                     projectUuid = ipAddress.getVpc().getProject().getUuid();
                 }
-            	routerStatus = virtualRoutersStatusCheck(ipAddress.getVpc().getDomain().getUuid(),
+                routerStatus = virtualRoutersStatusCheck(ipAddress.getVpc().getDomain().getUuid(),
                         ipAddress.getVpc().getDepartment().getUserName(), ipAddress.getVpc().getUuid(), projectUuid, ipAddress.getVpc().getUuid());
             } else {
                 routerStatus = virtualRoutersStatusCheck(ipAddress.getNetwork().getDomain().getUuid(),
@@ -817,13 +819,13 @@ public class IpaddressServiceImpl implements IpaddressService {
             if (routerStatus) {
                 configServer.setUserServer();
                 HashMap<String, String> optional = new HashMap<String, String>();
-				if (ipAddress.getVpcId() != null) {
-					optional.put(CloudStackConstants.CS_DOMAIN_ID, ipAddress.getVpc().getDomain().getUuid());
-					optional.put(CloudStackConstants.CS_ACCOUNT, ipAddress.getVpc().getDepartment().getUserName());
-				} else {
-					optional.put(CloudStackConstants.CS_DOMAIN_ID, ipAddress.getNetwork().getDomain().getUuid());
-					optional.put(CloudStackConstants.CS_ACCOUNT, ipAddress.getNetwork().getDepartment().getUserName());
-				}
+                if (ipAddress.getVpcId() != null) {
+                    optional.put(CloudStackConstants.CS_DOMAIN_ID, ipAddress.getVpc().getDomain().getUuid());
+                    optional.put(CloudStackConstants.CS_ACCOUNT, ipAddress.getVpc().getDepartment().getUserName());
+                } else {
+                    optional.put(CloudStackConstants.CS_DOMAIN_ID, ipAddress.getNetwork().getDomain().getUuid());
+                    optional.put(CloudStackConstants.CS_ACCOUNT, ipAddress.getNetwork().getDepartment().getUserName());
+                }
                 String createRemoteAccess = csVPNService.createRemoteAccessVpn(ipAddress.getUuid(), optional, CloudStackConstants.JSON);
                 JSONObject jobId = new JSONObject(createRemoteAccess).getJSONObject(CloudStackConstants.CS_CREATE_REMOTE_ACCESS_VPN);
                 if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
@@ -882,11 +884,11 @@ public class IpaddressServiceImpl implements IpaddressService {
         JSONArray routerListJSON = null;
         HashMap<String, String> routerOptional = new HashMap<String, String>();
         routerOptional.put(CloudStackConstants.CS_DOMAIN_ID, domainId);
-		if (vpcId != null) {
-			routerOptional.put(CloudStackConstants.CS_VPC_ID, vpcId);
-		} else {
-			routerOptional.put(CloudStackConstants.CS_NETWORK_ID, networkId);
-		}
+        if (vpcId != null) {
+            routerOptional.put(CloudStackConstants.CS_VPC_ID, vpcId);
+        } else {
+            routerOptional.put(CloudStackConstants.CS_NETWORK_ID, networkId);
+        }
         if (projectId !=null) {
             routerOptional.put(CloudStackConstants.CS_PROJECT_ID, projectId);
         } else {
@@ -984,13 +986,13 @@ public class IpaddressServiceImpl implements IpaddressService {
         return ipRepo.findByVPCWithPaging(pagingAndSorting.toPageRequest(), vpcId, State.ALLOCATED);
     }
 
-	@Override
-	public List<IpAddress> vpcNatList(Long networkId) throws Exception {
-		return ipRepo.findByNetworkAndNat(networkId, State.ALLOCATED, true);
-	}
+    @Override
+    public List<IpAddress> vpcNatList(Long networkId) throws Exception {
+        return ipRepo.findByNetworkAndNat(networkId, State.ALLOCATED, true);
+    }
 
-	@Override
-	public List<IpAddress> vpcLBList(Long networkId) throws Exception {
-		return loadBalancerService.vpcLBList(networkId);
-	}
+    @Override
+    public List<IpAddress> vpcLBList(Long networkId) throws Exception {
+        return loadBalancerService.vpcLBList(networkId);
+    }
 }

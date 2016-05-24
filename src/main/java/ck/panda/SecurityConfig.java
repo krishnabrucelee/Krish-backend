@@ -24,6 +24,7 @@ import ck.panda.service.LoginHistoryService;
 import ck.panda.service.LoginHistoryServiceImpl;
 import ck.panda.service.RoleService;
 import ck.panda.service.RoleServiceImpl;
+import ck.panda.service.ThemeSettingService;
 import ck.panda.service.UserService;
 import ck.panda.service.UserServiceImpl;
 import ck.panda.util.TokenDetails;
@@ -67,6 +68,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private MessageByLocaleService messageByLocaleService;
 
+    /** Theme Setting service attribute. */
+    @Autowired
+    private ThemeSettingService themeSettingService;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
@@ -78,7 +83,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .deleteCookies(GenericConstants.COOKIES_NAME).invalidateHttpSession(true).and().anonymous().disable()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint());
 
-        http.addFilterBefore(new AuthenticationFilter(databaseAuthenticationManager, userTokenDetails, messageByLocaleService),
+        http.addFilterBefore(new AuthenticationFilter(databaseAuthenticationManager, userTokenDetails, messageByLocaleService, themeSettingService),
                 BasicAuthenticationFilter.class);
     }
 

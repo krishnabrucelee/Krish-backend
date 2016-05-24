@@ -59,6 +59,14 @@ public class ThemeSetting implements Serializable {
     @OneToMany(cascade = CascadeType.ALL)
     private List<ThemeCustomisation> footers;
 
+    /** Welcome Text for login page. */
+    @Column(name = "welcome_content", columnDefinition = "TEXT")
+    private String welcomeContent;
+
+    /** Welcome Text for login page. */
+    @Column(name = "footer_content", columnDefinition = "TEXT")
+    private String footerContent;
+
     /** IsActive attribute to verify Active or Inactive. */
     @Column(name = "is_active")
     private Boolean isActive;
@@ -216,6 +224,42 @@ public class ThemeSetting implements Serializable {
      */
     public void setLogoImgPath(String logoImgPath) {
         this.logoImgPath = logoImgPath;
+    }
+
+    /**
+     * Get the welcomeContent of ThemeSetting.
+     *
+     * @return the welcomeContent
+     */
+    public String getWelcomeContent() {
+        return welcomeContent;
+    }
+
+    /**
+     * Set the welcomeContent of ThemeSetting.
+     *
+     * @param welcomeContent the welcomeContent to set
+     */
+    public void setWelcomeContent(String welcomeContent) {
+        this.welcomeContent = welcomeContent;
+    }
+
+    /**
+     * Get the footerContent of ThemeSetting.
+     *
+     * @return the footerContent
+     */
+    public String getFooterContent() {
+        return footerContent;
+    }
+
+    /**
+     * Set the footerContent of ThemeSetting.
+     *
+     * @param footerContent the footerContent to set
+     */
+    public void setFooterContent(String footerContent) {
+        this.footerContent = footerContent;
     }
 
     /**

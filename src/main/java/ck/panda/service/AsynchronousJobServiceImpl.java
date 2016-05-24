@@ -55,7 +55,6 @@ import ck.panda.util.EncryptionUtil;
 import ck.panda.util.JsonUtil;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
-import net.sf.ehcache.concurrent.Sync;
 
 /**
  * Synchronization of all the asynchronous data from the cloudStack.
@@ -1342,6 +1341,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             snapShot.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
                     snapShot.getTransDepartmentId(), convertEntityService.getDomain(snapShot.getTransDomainId())));
             snapShot.setSyncFlag(false);
+            snapShot.setStatus(snapShot.getStatus());
             if (snapShotService.findByUUID(snapShot.getUuid()) == null) {
                 snapShotService.save(snapShot);
             }

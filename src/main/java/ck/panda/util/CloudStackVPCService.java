@@ -602,4 +602,22 @@ public class CloudStackVPCService {
         return responseDocument;
     }
 
+    /**
+     * List physical network services.
+     *
+     * @param optional value
+     * @param response format
+     * @return string value
+     * @throws Exception unhandled errors.
+     */
+    public String listPhysicalNetworks(HashMap<String, String> optional, String response)
+            throws Exception {
+
+        LinkedList<NameValuePair> arguments
+                = server.getDefaultQuery("listPhysicalNetworks", optional);
+        arguments.add(new NameValuePair("response", response));
+        String responseDocument = server.request(arguments);
+        return responseDocument;
+    }
+
 }
