@@ -403,8 +403,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             ResourceLimitDepartment departmentsLimit = resourceLimitDepartmentService
                     .findByDepartmentAndResourceType(vmInstance.getDepartmentId(), ResourceType.Instance, true);
 
-            if (departmentsLimit != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
-                    .getType().equals(AccountType.USER)) {
+            if (departmentsLimit != null) {
                 if (vmInstance.getProjectId() != null) {
 //                    syncService
 //                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
@@ -428,8 +427,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             ResourceLimitDepartment departmentLimits = resourceLimitDepartmentService
                     .findByDepartmentAndResourceType(vmInstance.getDepartmentId(), ResourceType.Instance, true);
 
-            if (departmentLimits != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
-                    .getType().equals(AccountType.USER)) {
+            if (departmentLimits != null) {
                 if (vmInstance.getProjectId() != null) {
 //                    syncService
 //                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
@@ -453,16 +451,18 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             // check department and project quota validation.
             ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService.findByDepartmentAndResourceType(
                     vmInstance.getDepartmentId(), ResourceType.valueOf("Instance"), true);
-            if (departmentLimit != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
-                    .getType().equals(AccountType.USER)) {
-                if (vmInstance.getProjectId() != null) {
-//                    syncService
-//                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
-                    quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "RestoreInstance",
-                            vmInstance.getProjectId(), "Project");
-                } else {
-                    quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "RestoreInstance",
-                            vmInstance.getDepartmentId(), "Department");
+            if (departmentLimit != null) {
+                if (!convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
+                        .getType().equals(AccountType.ROOT_ADMIN)) {
+                    if (vmInstance.getProjectId() != null) {
+    //                    syncService
+    //                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
+                        quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "RestoreInstance",
+                                vmInstance.getProjectId(), "Project");
+                    } else {
+                        quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "RestoreInstance",
+                                vmInstance.getDepartmentId(), "Department");
+                    }
                 }
                 // 3. Check the resource availability to deploy new vm.
                 String isAvailable = isResourceAvailable(vmInstance, optionalMap);

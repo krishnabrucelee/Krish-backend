@@ -232,20 +232,22 @@ public class IpaddressServiceImpl implements IpaddressService {
                 convertEntityService.getVPCId(vpcId).getDepartmentId(), ResourceType.Instance, true);
         ResourceLimitProject projectLimit = resourceLimitProjectService
                 .findByProjectAndResourceType(convertEntityService.getVPCId(vpcId).getProjectId(), ResourceLimitProject.ResourceType.Instance, true);
-        if (departmentLimit != null && convertEntityService
-                .getDepartmentById(convertEntityService.getVPCId(vpcId).getDepartmentId()).getType()
-                .equals(AccountType.USER)) {
-            if (convertEntityService.getVPCId(vpcId).getProjectId() != null) {
-                if (projectLimit != null) {
-                quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getVPCId(vpcId),
-                        "IP", convertEntityService.getVPCId(vpcId).getProjectId(), "Project");
-                } else {
-                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Resource limit for project has not been set. Please update project quota");
+        if (departmentLimit != null) {
+            if (!convertEntityService
+                    .getDepartmentById(convertEntityService.getVPCId(vpcId).getDepartmentId()).getType()
+                    .equals(AccountType.ROOT_ADMIN)) {
+                if (convertEntityService.getVPCId(vpcId).getProjectId() != null) {
+                    if (projectLimit != null) {
+                    quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getVPCId(vpcId),
+                            "IP", convertEntityService.getVPCId(vpcId).getProjectId(), "Project");
+                    } else {
+                        throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Resource limit for project has not been set. Please update project quota");
+                    }
                 }
-            }
-            else {
-                quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getVPCId(vpcId),
-                        "IP", convertEntityService.getVPCId(vpcId).getDepartmentId(), "Department");
+                else {
+                    quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getVPCId(vpcId),
+                            "IP", convertEntityService.getVPCId(vpcId).getDepartmentId(), "Department");
+                }
             }
             // 3. Check the resource availability to acquire new ip.
             String isAvailable = isResourceAvailableForVPC(convertEntityService.getVPCId(vpcId), optionalMap);
