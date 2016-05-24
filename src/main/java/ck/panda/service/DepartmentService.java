@@ -175,4 +175,14 @@ public interface DepartmentService extends CRUDService<Department> {
      */
     Page<Department> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText, Long userId) throws Exception;
 
+    /**
+     * Department update with id.
+     *
+     * @param department object.
+     * @param id of the session.
+     * @return department.
+     * @throws Exception if error occurs.
+     */
+    Department update(Department department, Long id) throws Exception;
+
 }

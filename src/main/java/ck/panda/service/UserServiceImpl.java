@@ -153,7 +153,12 @@ public class UserServiceImpl implements UserService {
                 } else {
                     dept = departmentService.find(convertEntityService.getOwnerById(id).getDepartmentId()).getUserName();
                 }
-                config.setServer(1L);
+                if ((convertEntityService.getOwnerById(id).getType()).equals(User.UserType.ROOT_ADMIN)) {
+                    config.setUserServer();
+                }
+                else {
+                    config.setServer(1L);
+                }
                 String cloudResponse = csUserService.createUser(dept, user.getEmail(),
                         user.getFirstName(), user.getLastName(), user.getUserName(), user.getPassword(), cloudStackConstants.JSON,
                         userMap);
@@ -212,7 +217,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @PreAuthorize("hasPermission(#user.getSyncFlag(), 'EDIT_USER')")
-    public User update(User user) throws Exception {
+    public User update(User user, Long id) throws Exception {
         if (user.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity(cloudStackConstants.CS_USER, user);
             errors = validator.validateEntity(user, errors);
@@ -224,7 +229,12 @@ public class UserServiceImpl implements UserService {
                 HashMap<String, String> optional = new HashMap<String, String>();
                 optional.put(cloudStackConstants.CS_DOMAIN_ID, user.getDomain().getUuid());
                 optional.put(cloudStackConstants.CS_USER_NAME, user.getUserName());
-                config.setServer(1L);
+                if ((convertEntityService.getOwnerById(id).getType()).equals(User.UserType.ROOT_ADMIN)) {
+                    config.setUserServer();
+                }
+                else {
+                    config.setServer(1L);
+                }
                 csUserService.updateUser(user.getUuid(), optional, cloudStackConstants.JSON);
                 if (user.getType() == User.UserType.DOMAIN_ADMIN) {
                     Domain domain = user.getDomain();
@@ -375,12 +385,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @PreAuthorize("hasPermission(#user.getSyncFlag(), 'DELETE_USER')")
-    public User softDelete(User user) throws Exception {
+    public User softDelete(User user,Long id) throws Exception {
         user.setIsActive(false);
         user.setStatus(User.Status.DELETED);
         if (user.getSyncFlag()) {
             // set server for finding value in configuration
-            config.setServer(1L);
+            if ((convertEntityService.getOwnerById(id).getType()).equals(User.UserType.ROOT_ADMIN)) {
+                config.setUserServer();
+            }
+            else {
+                config.setServer(1L);
+            }
             csUserService.deleteUser((user.getUuid()), cloudStackConstants.JSON);
             if (user.getType() == UserType.DOMAIN_ADMIN) {
                 Role role = roleService.find(user.getRoleId());
@@ -761,5 +776,21 @@ public class UserServiceImpl implements UserService {
             }
         }
         return listUser;
+    }
+
+    @Override
+    public User update(User user) throws Exception {
+        if (!user.getSyncFlag()) {
+            return userRepository.save(user);
+        }
+        return user;
+    }
+
+    @Override
+    public User softDelete(User user) throws Exception {
+        if (!user.getSyncFlag()) {
+            return userRepository.save(user);
+        }
+        return user;
     }
 }
