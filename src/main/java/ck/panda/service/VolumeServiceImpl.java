@@ -178,20 +178,22 @@ public class VolumeServiceImpl implements VolumeService {
                         .findByDepartmentAndResourceType(volume.getDepartmentId(), ResourceType.Instance, true);
                 ResourceLimitProject projectLimit = resourceLimitProjectService
                         .findByProjectAndResourceType(volume.getProjectId(), ResourceLimitProject.ResourceType.Instance, true);
-                if (departmentLimit != null && convertEntityService.getDepartmentById(volume.getDepartmentId()).getType()
-                        .equals(AccountType.USER)) {
-                    if (volume.getProjectId() != null) {
-                        if (projectLimit != null) {
-                            quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "Volume",
-                                volume.getProjectId(), "Project");
+                if (departmentLimit != null) {
+                    if (!convertEntityService.getDepartmentById(volume.getDepartmentId()).getType()
+                            .equals(AccountType.ROOT_ADMIN)) {
+                        if (volume.getProjectId() != null) {
+                            if (projectLimit != null) {
+                                quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "Volume",
+                                    volume.getProjectId(), "Project");
+                            } else {
+                                errors.addGlobalError(
+                                        "Resource limit for project has not been set. Please update project quota");
+                                throw new ApplicationException(errors);
+                            }
                         } else {
-                            errors.addGlobalError(
-                                    "Resource limit for project has not been set. Please update project quota");
-                            throw new ApplicationException(errors);
+                            quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "Volume",
+                                    volume.getDepartmentId(), "Department");
                         }
-                    } else {
-                        quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "Volume",
-                                volume.getDepartmentId(), "Department");
                     }
 
                     // 3. Check the resource availability to create new volume.
@@ -214,8 +216,11 @@ public class VolumeServiceImpl implements VolumeService {
                         }
                     }
                 } else {
-                    errors.addGlobalError(
-                            "Resource limit for department has not been set. Please update department quota");
+                    if (!convertEntityService.getDepartmentById(volume.getDepartmentId()).getType()
+                            .equals(AccountType.ROOT_ADMIN)) {
+                        errors.addGlobalError(
+                                "Resource limit for department has not been set. Please update department quota");
+                    }
                     throw new ApplicationException(errors);
                 }
             }
