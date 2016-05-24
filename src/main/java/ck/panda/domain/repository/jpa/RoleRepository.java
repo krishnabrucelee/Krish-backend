@@ -56,7 +56,7 @@ public interface RoleRepository extends PagingAndSortingRepository<Role, Long> {
      * @param pageable pagination information.
      * @return list of user.
      */
-    @Query(value = "SELECT role FROM Role AS role WHERE role.isActive IS TRUE AND role.name != 'FULL_PERMISSION'")
+    @Query(value = "SELECT role FROM Role AS role WHERE role.isActive IS TRUE")
     Page<Role> findAllRolesWithoutFullPermissionAndActive(Pageable pageable);
 
     /**
@@ -102,8 +102,7 @@ public interface RoleRepository extends PagingAndSortingRepository<Role, Long> {
      * @param pageable pagination information.
      * @return list of role.
      */
-    @Query(value = "SELECT role FROM Role AS role WHERE (role.domainId = :domainId OR 0 = :domainId) AND (role.name LIKE %:search% OR role.department.userName LIKE %:search% OR role.domain.name LIKE %:search%"
-            + " OR role.description LIKE %:search%) AND role.isActive = :isActive AND role.name != 'FULL_PERMISSION'")
-    Page<Role> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, @Param("search") String searchText, Pageable pageable);
+    @Query(value = "SELECT role FROM Role AS role WHERE (role.domainId = :domainId OR 0 = :domainId) AND (role.name LIKE %:searchText% OR role.department.userName LIKE %:searchText% OR role.description LIKE %:searchText%) AND role.isActive = :isActive")
+    Page<Role> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, @Param("searchText") String searchText, Pageable pageable);
 
 }

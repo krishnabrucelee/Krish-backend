@@ -256,6 +256,7 @@ public class DomainServiceImpl implements DomainService {
             Role newRole = new Role();
             newRole.setName("FULL_PERMISSION");
             newRole.setDepartmentId(userObj.getDepartmentId());
+            newRole.setDomainId(userObj.getDomainId());
             newRole.setDescription("Allow full permission");
             newRole.setStatus(Role.Status.ENABLED);
             newRole.setPermissionList(permissionService.findAll());
