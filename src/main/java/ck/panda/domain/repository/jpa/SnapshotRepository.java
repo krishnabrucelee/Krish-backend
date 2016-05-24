@@ -23,7 +23,7 @@ public interface SnapshotRepository extends PagingAndSortingRepository<Snapshot,
      * @param isActive get the snapshot list based on active/inactive status.
      * @return list of snapshots.
      */
-    @Query(value = "SELECT snap FROM Snapshot snap WHERE snap.isActive =:isActive")
+    @Query(value = "SELECT snap FROM Snapshot snap LEFT JOIN snap.volume WHERE snap.isActive =:isActive")
     Page<Snapshot> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
 
     /**
@@ -63,7 +63,7 @@ public interface SnapshotRepository extends PagingAndSortingRepository<Snapshot,
      * @param search search text
      * @return Vm snapshot.
      */
-    @Query(value = "SELECT snapshot FROM Snapshot snapshot WHERE (snapshot.domainId =:domainId OR 0L = :domainId) AND snapshot.isActive =:isActive AND (snapshot.name LIKE %:search% OR snapshot.volume.name LIKE %:search% "
+    @Query(value = "SELECT snapshot FROM Snapshot snapshot LEFT JOIN snapshot.volume  WHERE (snapshot.domainId =:domainId OR 0L = :domainId) AND snapshot.isActive =:isActive AND (snapshot.name LIKE %:search% OR snapshot.volume.name LIKE %:search% "
             + "OR snapshot.createdDateTime LIKE %:search% )")
     Page<Snapshot> findAllByDomainIdAndIsActiveSearchText(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable, @Param("search") String search);
 
