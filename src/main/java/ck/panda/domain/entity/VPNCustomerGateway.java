@@ -78,7 +78,7 @@ public class VPNCustomerGateway implements Serializable {
 
     /** Gateway of the vpn. */
     @Column(name = "dpd")
-    private String deadPeerDetection;
+    private Boolean deadPeerDetection;
 
     /**  Internet Key Exchange life time of the vpn customer gateway. */
     @Column(name = "ike_life_time")
@@ -580,7 +580,7 @@ public class VPNCustomerGateway implements Serializable {
      *
      * @return the deadPeerDetection
      */
-    public String getDeadPeerDetection() {
+    public Boolean getDeadPeerDetection() {
         return deadPeerDetection;
     }
 
@@ -589,7 +589,7 @@ public class VPNCustomerGateway implements Serializable {
      *
      * @param deadPeerDetection  to set
      */
-    public void setDeadPeerDetection(String deadPeerDetection) {
+    public void setDeadPeerDetection(Boolean deadPeerDetection) {
         this.deadPeerDetection = deadPeerDetection;
     }
 
@@ -793,7 +793,7 @@ public class VPNCustomerGateway implements Serializable {
             gateway.setIpsecPresharedKey(JsonUtil.getStringValue(jsonObject, CS_IPSEC_SHARED));
             gateway.setIKELifeTime(JsonUtil.getStringValue(jsonObject,CS_IKE_LIFETIME));
             gateway.setESPLifeTime(JsonUtil.getStringValue(jsonObject,CS_ESP_LIFETIME));
-            gateway.setDeadPeerDetection(JsonUtil.getStringValue(jsonObject,CS_DPD));
+            gateway.setDeadPeerDetection(JsonUtil.getBooleanValue(jsonObject,CS_DPD));
             gateway.setSyncFlag(true);
             gateway.setIkePolicy(JsonUtil.getStringValue(jsonObject,CS_IKE_POLICY));
             gateway.setEspPolicy(JsonUtil.getStringValue(jsonObject,CS_ESP_POLICY));
