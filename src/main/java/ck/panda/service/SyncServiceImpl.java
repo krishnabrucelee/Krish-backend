@@ -1478,6 +1478,7 @@ public class SyncServiceImpl implements SyncService {
         List<Template> appTemplateList = templateService.findAll();
 
         // 3. Iterate application template list
+        int activeTemplateCount = 0;
         for (Template template : appTemplateList) {
             LOGGER.debug("Total rows updated : " + (appTemplateList.size()));
             // 3.1 Find the corresponding CS server template object by finding
@@ -1503,6 +1504,9 @@ public class SyncServiceImpl implements SyncService {
 
                 // 3.2 If found, update the template object in app db
                 templateService.update(template);
+                if (template.getIsActive() == true) {
+                    activeTemplateCount++;
+                }
 
                 // 3.3 Remove once updated, so that we can have the list of cs
                 // template which is not added in the app
@@ -1517,12 +1521,15 @@ public class SyncServiceImpl implements SyncService {
         // add it to app db
         for (String key : csTemplateMap.keySet()) {
             templateService.save(csTemplateMap.get(key));
-            pingTemplateInitialSync(csTemplateMap.get(key));
+            if (csTemplateMap.get(key).getIsActive() == true) {
+                pingTemplateInitialSync(csTemplateMap.get(key));
+                activeTemplateCount++;
+            }
         }
         LOGGER.debug("Total rows added : " + (csTemplateMap.size()));
 
         //Update manual sync update domain count
-        updateManualSyncCount("TEMPLATE", csTemplatesList.size(), csTemplatesList.size());
+        updateManualSyncCount("TEMPLATE", activeTemplateCount, activeTemplateCount);
 
     }
 
