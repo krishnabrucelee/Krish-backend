@@ -1532,6 +1532,7 @@ public class Template implements Serializable {
                     template.setSize(Long.parseLong(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_SIZE)));
                 }
             } else {
+                template.setIsActive(false);
                 template.setStatus(Template.Status.INACTIVE);
             }
         } catch (Exception e) {

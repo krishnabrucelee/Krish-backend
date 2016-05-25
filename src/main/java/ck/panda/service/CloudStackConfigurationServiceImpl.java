@@ -727,7 +727,13 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
      */
     public void syncTemplatesCount(String keyName, String type) throws Exception {
         List<Template> csTemplatesList = templateService.findAllFromCSServer();
-        updateManualSyncCount("TEMPLATE", csTemplatesList.size());
+        int activeTemplateCount = 0;
+        for (Template template : csTemplatesList) {
+            if (template.getIsActive() == true) {
+                activeTemplateCount++;
+            }
+        }
+        updateManualSyncCount("TEMPLATE", activeTemplateCount);
     }
 
     /**
