@@ -355,7 +355,7 @@ public class IpaddressServiceImpl implements IpaddressService {
             if (portForwardingList.size() != 0) {
                 for (PortForwarding portForwarding : portForwardingList) {
                     portForwarding.setIsActive(false);
-                    configServer.setServer(1L);
+                    configServer.setUserServer();
                     portForwarding.setSyncFlag(false);
                     portForwardingService.softDelete(portForwarding);
                 }
@@ -363,7 +363,7 @@ public class IpaddressServiceImpl implements IpaddressService {
             if (firewallList.size() != 0) {
                 for (FirewallRules firewallRules : firewallList) {
                     firewallRules.setIsActive(false);
-                    configServer.setServer(1L);
+                    configServer.setUserServer();
                     firewallRules.setSyncFlag(false);
                     egressRuleService.save(firewallRules);
                 }
@@ -371,7 +371,7 @@ public class IpaddressServiceImpl implements IpaddressService {
             if (loadBalancerList.size() != 0) {
                 for (LoadBalancerRule loadBalancerRule : loadBalancerList) {
                     loadBalancerRule.setIsActive(false);
-                    configServer.setServer(1L);
+                    configServer.setUserServer();
                     loadBalancerRule.setSyncFlag(false);
                     loadBalancerService.save(loadBalancerRule);
                 }
@@ -446,7 +446,7 @@ public class IpaddressServiceImpl implements IpaddressService {
         ipMap.put(CS_ALLOCATED_ONLY, CS_TRUE);
         ipMap.put(CS_ASSOCIATED_NETWORK_ID, networkId);
         ipMap.put(CS_IS_SOURCE_NAT, CS_TRUE);
-        configServer.setServer(1L);
+        configServer.setUserServer();
         Network network = convertEntityService.getNetworkById(convertEntityService.getNetworkByUuid(networkId));
         if (network.getProjectId() != null) {
             ipMap.put(CloudStackConstants.CS_PROJECT_ID, convertEntityService.getProjectById(network.getProjectId()).getUuid());
