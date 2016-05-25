@@ -95,7 +95,7 @@ public interface VmSnapshotRepository extends PagingAndSortingRepository<VmSnaps
      * @param pageable for paging and sorting
      * @return snapshot.
      */
-    @Query(value = "SELECT snapshot FROM VmSnapshot snapshot LEFT JOIN snapshot.project WHERE (snapshot.project in :allProjectList OR snapshot.departmentId = :departmentId ) AND snapshot.isRemoved =:isRemoved AND snapshot.status <>:status")
+    @Query(value = "SELECT snapshot FROM VmSnapshot snapshot LEFT JOIN snapshot.project LEFT JOIN snapshot.vm WHERE (snapshot.project in :allProjectList OR snapshot.departmentId = :departmentId ) AND snapshot.isRemoved =:isRemoved AND snapshot.status <>:status")
     Page<VmSnapshot> findByProjectDepartmentAndIsActive(@Param("allProjectList") List<Project> allProjectList,
             @Param("departmentId") Long departmentId,
             @Param("isRemoved") Boolean isRemoved, Pageable pageable,@Param("status") Status status);
@@ -109,7 +109,7 @@ public interface VmSnapshotRepository extends PagingAndSortingRepository<VmSnaps
      * @param pageable for paging and sorting.
      * @return snapshot.
      */
-    @Query(value = "SELECT snapshot FROM VmSnapshot snapshot LEFT JOIN snapshot.project WHERE snapshot.departmentId= :departmentId AND snapshot.isRemoved IS :isRemoved AND snapshot.projectId = NULL AND snapshot.status <>:status ")
+    @Query(value = "SELECT snapshot FROM VmSnapshot snapshot LEFT JOIN snapshot.project LEFT JOIN snapshot.vm WHERE snapshot.departmentId= :departmentId AND snapshot.isRemoved IS :isRemoved AND snapshot.projectId = NULL AND snapshot.status <>:status ")
     Page<VmSnapshot> findByDepartmentAndPagination(@Param("departmentId") Long departmentId,
             @Param("isRemoved") Boolean isRemoved, Pageable pageable,@Param("status") Status status);
 

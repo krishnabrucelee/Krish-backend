@@ -87,7 +87,7 @@ public class SnapshotServiceImpl implements SnapshotService {
                 // set server for maintain session with configuration values
                 snapshot.setVolumeId(snapshot.getVolume().getId());
                 snapshot.setIsActive(true);
-                snapshotService.setServer(configServer.setServer(1L));
+                snapshotService.setServer(configServer.setUserServer());
                 HashMap<String, String> snapMap = new HashMap<String, String>();
                 snapMap.put("name", snapshot.getName());
                 String snapresponse = snapshotService.createSnapshot(snapshot.getVolume().getUuid(), snapMap, "json");
@@ -234,7 +234,7 @@ public class SnapshotServiceImpl implements SnapshotService {
         snapshot.setStatus(Snapshot.Status.DESTROYED);
         if (snapshot.getSyncFlag()) {
             // set server for finding value in configuration
-            snapshotService.setServer(configServer.setServer(1L));
+            snapshotService.setServer(configServer.setUserServer());
             snapshotService.deleteSnapshot(CloudStackConstants.JSON, snapshot.getUuid());
         }
         return snapshotRepo.save(snapshot);

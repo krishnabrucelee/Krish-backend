@@ -66,6 +66,7 @@ import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.entity.VPC;
+import ck.panda.domain.entity.VPNCustomerGateway;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.rabbitmq.util.ResponseEvent;
 import ck.panda.domain.entity.VmInstance;
@@ -349,6 +350,8 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private PhysicalNetworkService physicalNetworkService;
 
+     @Autowired
+    private VPNCustomerGatewayService vpnGatewayService;
 
     /** Permission instance properties. */
     @Value(value = "${permission.instance}")
@@ -863,9 +866,15 @@ public class SyncServiceImpl implements SyncService {
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Primary storage", e);
         }
+        try {
+            // 48. Sync VPN Customer gateway entity
+            this. syncVPNCustomerGateway();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPN customer gateway", e);
+        }
 
         try {
-            // 48. Sync general configuration
+            // 49. Sync general configuration
             this.syncGeneralConfiguration();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch General Configuration", e);
@@ -1469,6 +1478,7 @@ public class SyncServiceImpl implements SyncService {
         List<Template> appTemplateList = templateService.findAll();
 
         // 3. Iterate application template list
+        int activeTemplateCount = 0;
         for (Template template : appTemplateList) {
             LOGGER.debug("Total rows updated : " + (appTemplateList.size()));
             // 3.1 Find the corresponding CS server template object by finding
@@ -1494,6 +1504,9 @@ public class SyncServiceImpl implements SyncService {
 
                 // 3.2 If found, update the template object in app db
                 templateService.update(template);
+                if (template.getIsActive() == true) {
+                    activeTemplateCount++;
+                }
 
                 // 3.3 Remove once updated, so that we can have the list of cs
                 // template which is not added in the app
@@ -1508,12 +1521,15 @@ public class SyncServiceImpl implements SyncService {
         // add it to app db
         for (String key : csTemplateMap.keySet()) {
             templateService.save(csTemplateMap.get(key));
-            pingTemplateInitialSync(csTemplateMap.get(key));
+            if (csTemplateMap.get(key).getIsActive() == true) {
+                pingTemplateInitialSync(csTemplateMap.get(key));
+                activeTemplateCount++;
+            }
         }
         LOGGER.debug("Total rows added : " + (csTemplateMap.size()));
 
         //Update manual sync update domain count
-        updateManualSyncCount("TEMPLATE", csTemplatesList.size(), csTemplatesList.size());
+        updateManualSyncCount("TEMPLATE", activeTemplateCount, activeTemplateCount);
 
     }
 
@@ -2168,26 +2184,24 @@ public class SyncServiceImpl implements SyncService {
     public void syncResourceLimit() throws ApplicationException, Exception {
         List<Department> departments = departmentService.findAllByActive(true);
         for (Department deparment : departments) {
-            if (!deparment.getType().equals(Department.AccountType.ROOT_ADMIN)) {
-                for (String key : convertEntityService.getResourceTypeValue().keySet()) {
-                    ResourceLimitDepartment persistDepartment = resourceDepartmentService
-                            .findByDepartmentAndResourceType(deparment.getId(), ResourceLimitDepartment.ResourceType
-                                    .valueOf(convertEntityService.getResourceTypeValue().get(key)), true);
-                    if (persistDepartment != null) {
-                        resourceDepartmentService.delete(persistDepartment);
-                    }
-                    ResourceLimitDepartment resourceLimitDepartment = new ResourceLimitDepartment();
-                    resourceLimitDepartment.setDepartmentId(deparment.getId());
-                    resourceLimitDepartment.setDomainId(deparment.getDomainId());
-                    resourceLimitDepartment.setMax(0L);
-                    resourceLimitDepartment.setAvailable(0L);
-                    resourceLimitDepartment.setUsedLimit(0L);
-                    resourceLimitDepartment.setResourceType(ResourceLimitDepartment.ResourceType
-                            .valueOf(convertEntityService.getResourceTypeValue().get(key)));
-                    resourceLimitDepartment.setIsSyncFlag(false);
-                    resourceLimitDepartment.setIsActive(true);
-                    resourceDepartmentService.update(resourceLimitDepartment);
+            for (String key : convertEntityService.getResourceTypeValue().keySet()) {
+                ResourceLimitDepartment persistDepartment = resourceDepartmentService
+                        .findByDepartmentAndResourceType(deparment.getId(), ResourceLimitDepartment.ResourceType
+                                .valueOf(convertEntityService.getResourceTypeValue().get(key)), true);
+                if (persistDepartment != null) {
+                    resourceDepartmentService.delete(persistDepartment);
                 }
+                ResourceLimitDepartment resourceLimitDepartment = new ResourceLimitDepartment();
+                resourceLimitDepartment.setDepartmentId(deparment.getId());
+                resourceLimitDepartment.setDomainId(deparment.getDomainId());
+                resourceLimitDepartment.setMax(0L);
+                resourceLimitDepartment.setAvailable(0L);
+                resourceLimitDepartment.setUsedLimit(0L);
+                resourceLimitDepartment.setResourceType(ResourceLimitDepartment.ResourceType
+                        .valueOf(convertEntityService.getResourceTypeValue().get(key)));
+                resourceLimitDepartment.setIsSyncFlag(false);
+                resourceLimitDepartment.setIsActive(true);
+                resourceDepartmentService.update(resourceLimitDepartment);
             }
             HashMap<String, String> departmentCountMap = new HashMap<String, String>();
             departmentCountMap.put(CloudStackConstants.CS_ACCOUNT, deparment.getUserName());
@@ -2377,7 +2391,7 @@ public class SyncServiceImpl implements SyncService {
                  ResourceLimitDepartment resourceLimitDepartment = resourceDepartmentService
                          .findByDepartmentAndResourceType(department.getId(),
                                  ResourceLimitDepartment.ResourceType.valueOf(key), true);
-                 resourceLimitDepartment.setUsedLimit(-1L);
+                 resourceLimitDepartment.setUsedLimit(Long.parseLong(departmentMap.get(key)));
                  resourceLimitDepartment.setMax(-1L);
                  resourceLimitDepartment.setIsSyncFlag(false);
                  resourceDepartmentService.update(resourceLimitDepartment);
@@ -2968,6 +2982,7 @@ public class SyncServiceImpl implements SyncService {
                         Role newRole = new Role();
                         newRole.setName("FULL_PERMISSION");
                         newRole.setDepartmentId(department.getId());
+                        newRole.setDomainId(department.getDomainId());
                         newRole.setDescription("Allow full permission");
                         newRole.setStatus(Role.Status.ENABLED);
                         newRole.setPermissionList(newPermissionList);
@@ -2976,6 +2991,7 @@ public class SyncServiceImpl implements SyncService {
                     } else if (role != null) {
                         role.setName("FULL_PERMISSION");
                         role.setDepartmentId(department.getId());
+                        role.setDomainId(department.getDomainId());
                         role.setDescription("Allow full permission");
                         role.setStatus(Role.Status.ENABLED);
                         role.setPermissionList(permissionService.findAll());
@@ -2989,6 +3005,7 @@ public class SyncServiceImpl implements SyncService {
                     if (role != null) {
                         role.setName("FULL_PERMISSION");
                         role.setDepartmentId(department.getId());
+                        role.setDomainId(department.getDomainId());
                         role.setDescription("Allow full permission");
                         role.setStatus(Role.Status.ENABLED);
                         role.setPermissionList(permissionService.findAll());
@@ -2998,6 +3015,7 @@ public class SyncServiceImpl implements SyncService {
                         Role newRole = new Role();
                         newRole.setName("FULL_PERMISSION");
                         newRole.setDepartmentId(department.getId());
+                        newRole.setDomainId(department.getDomainId());
                         newRole.setDescription("Allow full permission");
                         newRole.setStatus(Role.Status.ENABLED);
                         newRole.setPermissionList(permissionService.findAll());
@@ -3784,6 +3802,50 @@ public class SyncServiceImpl implements SyncService {
             primaryStorageService.save(csStorageMap.get(key));
         }
         updateManualSyncCount("PRIMARY_STORAGE", csPrimaryStorageList.size(), csPrimaryStorageList.size());
+    }
+
+    /**
+     * Sync with Cloud Server Secondary storage.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    @Override
+    public void syncVPNCustomerGateway() throws ApplicationException, Exception {
+
+        // 1. Get all the pod objects from CS server as hash
+        List<VPNCustomerGateway> csGatewayList = vpnGatewayService.findAllFromCSServer();
+        HashMap<String, VPNCustomerGateway> csGatewayMap = (HashMap<String, VPNCustomerGateway>) VPNCustomerGateway.convert(csGatewayList);
+
+        // 2. Get all the pod objects from application
+        List<VPNCustomerGateway> appStorageList = vpnGatewayService.findAll();
+
+        // 3. Iterate application pod list
+        for (VPNCustomerGateway gateway : appStorageList) {
+            // 3.1 Find the corresponding CS server host object by finding it in
+            // a hash using uuid
+            if (csGatewayMap.containsKey(gateway.getUuid())) {
+                VPNCustomerGateway csStorage = csGatewayMap.get(gateway.getUuid());
+                gateway.setName(csStorage.getName());
+
+                // 3.2 If found, update the pod object in app db
+                vpnGatewayService.update(gateway);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // host which is not added in the app
+                csGatewayMap.remove(gateway.getUuid());
+            } else {
+                vpnGatewayService.delete(gateway);
+            }
+
+        }
+        // 4. Get the remaining list of cs server hash user object, then iterate
+        // and
+        // add it to app db
+        for (String key : csGatewayMap.keySet()) {
+            vpnGatewayService.save(csGatewayMap.get(key));
+        }
+        //updateManualSyncCount("SECONDARY_STORAGE", csSecondaryStorageList.size(), csSecondaryStorageList.size());
     }
 
 }

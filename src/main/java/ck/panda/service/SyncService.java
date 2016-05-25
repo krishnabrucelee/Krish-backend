@@ -446,7 +446,15 @@ public interface SyncService {
     void syncPrimaryStorage() throws ApplicationException, Exception;
 
     /**
-     * Sync with Cloud physical network.
+     * Sync with vpn customer gateway.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    void syncVPNCustomerGateway() throws ApplicationException, Exception;
+
+
+    /** Sync with Cloud physical network.
      *
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.

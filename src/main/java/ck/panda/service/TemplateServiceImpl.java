@@ -279,6 +279,7 @@ public class TemplateServiceImpl implements TemplateService {
         List<Template> templateList = new ArrayList<Template>();
         HashMap<String, String> templateMap = new HashMap<String, String>();
         templateMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+        templateMap.put("showremoved", CloudStackConstants.STATUS_ACTIVE);
         String response = cloudStackTemplateService.listTemplates(ALL_TEMPLATE.toLowerCase(), CloudStackConstants.JSON, templateMap);
         JSONArray templateListJSON = null;
         JSONObject responseObject = new JSONObject(response).getJSONObject(CloudStackConstants.CS_LIST_TEMPLATE_RESPONSE);
@@ -287,18 +288,24 @@ public class TemplateServiceImpl implements TemplateService {
             for (int i = 0, size = templateListJSON.length(); i < size; i++) {
                 Template template = Template.convert(templateListJSON.getJSONObject(i));
                 OsType osType = osTypeService.findByUUID(template.getTransOsType());
-                template.setOsTypeId(osType.getId());
-                template.setOsCategoryId(osType.getOsCategoryId());
-                if (osType.getDescription().contains(GenericConstants.TEMPLATE_ARCHITECTURE[0])) {
-                    template.setArchitecture(GenericConstants.TEMPLATE_ARCHITECTURE[0]);
-                } else if (osType.getDescription().contains(GenericConstants.TEMPLATE_ARCHITECTURE[1])) {
-                    template.setArchitecture(GenericConstants.TEMPLATE_ARCHITECTURE[1]);
+                if (osType != null) {
+                    template.setOsTypeId(osType.getId());
+                    template.setOsCategoryId(osType.getOsCategoryId());
+                    if (osType.getDescription().contains(GenericConstants.TEMPLATE_ARCHITECTURE[0])) {
+                        template.setArchitecture(GenericConstants.TEMPLATE_ARCHITECTURE[0]);
+                    } else if (osType.getDescription().contains(GenericConstants.TEMPLATE_ARCHITECTURE[1])) {
+                        template.setArchitecture(GenericConstants.TEMPLATE_ARCHITECTURE[1]);
+                    }
+                    template.setDisplayText(osType.getDescription());
                 }
-                template.setDisplayText(osType.getDescription());
                 Zone zone = zoneService.findByUUID(template.getTransZone());
-                template.setZoneId(zone.getId());
+                if (zone != null) {
+                    template.setZoneId(zone.getId());
+                }
                 Hypervisor hypervisor = hypervisorService.findByName(template.getTransHypervisor());
-                template.setHypervisorId(hypervisor.getId());
+                if (hypervisor != null) {
+                    template.setHypervisorId(hypervisor.getId());
+                }
                 template.setTemplateOwnerId(convertEntityService.getUserByName(template.getTransCreatedName(),
                     convertEntityService.getDomain(template.getTransDomain())));
                 template.setDomainId(convertEntityService.getDomainId(template.getTransDomain()));
@@ -328,15 +335,17 @@ public class TemplateServiceImpl implements TemplateService {
             for (int i = 0, size = isoTemplateListJSON.length(); i < size; i++) {
                 Template template = Template.convert(isoTemplateListJSON.getJSONObject(i));
                 OsType osType = osTypeService.findByUUID(template.getTransOsType());
-                template.setOsTypeId(osType.getId());
-                template.setOsCategoryId(osType.getOsCategoryId());
-                if (osType.getDescription().contains(GenericConstants.TEMPLATE_ARCHITECTURE[0])) {
-                    template.setArchitecture(GenericConstants.TEMPLATE_ARCHITECTURE[0]);
-                } else if (osType.getDescription().contains(GenericConstants.TEMPLATE_ARCHITECTURE[1])) {
-                    template.setArchitecture(GenericConstants.TEMPLATE_ARCHITECTURE[1]);
+                if (osType != null) {
+                    template.setOsTypeId(osType.getId());
+                    template.setOsCategoryId(osType.getOsCategoryId());
+                    if (osType.getDescription().contains(GenericConstants.TEMPLATE_ARCHITECTURE[0])) {
+                        template.setArchitecture(GenericConstants.TEMPLATE_ARCHITECTURE[0]);
+                    } else if (osType.getDescription().contains(GenericConstants.TEMPLATE_ARCHITECTURE[1])) {
+                        template.setArchitecture(GenericConstants.TEMPLATE_ARCHITECTURE[1]);
+                    }
+                    template.setDisplayText(osType.getDescription());
                 }
-                template.setDisplayText(osType.getDescription());
-                if (!template.getTransZone().equals("")) {
+                if (!template.getTransZone().equals("") && zoneService.findByUUID(template.getTransZone()) != null) {
                     template.setZoneId(zoneService.findByUUID(template.getTransZone()).getId());
                 }
                 template.setHypervisorId(1L);

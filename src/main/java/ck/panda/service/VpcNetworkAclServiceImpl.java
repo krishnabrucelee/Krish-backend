@@ -62,7 +62,7 @@ public class VpcNetworkAclServiceImpl implements VpcNetworkAclService {
     public VpcNetworkAcl update(VpcNetworkAcl vpcNetworkAcl) throws Exception {
         if (vpcNetworkAcl.getSyncFlag()) {
             HashMap<String, String> vpcAclMap = new HashMap<String, String>();
-            config.setServer(1L);
+            config.setUserServer();
             vpcAclMap.put("action", vpcNetworkAcl.getAction());
             vpcAclMap.put("cidrlist", vpcNetworkAcl.getCidrList());
             vpcAclMap.put("number", vpcNetworkAcl.getRuleNumber());
