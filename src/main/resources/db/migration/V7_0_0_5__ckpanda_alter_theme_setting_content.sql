@@ -1,3 +1,4 @@
+DROP PROCEDURE IF EXISTS `alter_theme_settings`;
 DELIMITER $$
 CREATE PROCEDURE `alter_theme_settings` ()
 BEGIN
@@ -7,7 +8,7 @@ BEGIN
        WHERE table_name = 'theme_setting'
        AND table_schema = 'ckpanda'
        AND column_name = 'welcome_content' OR column_name = 'footer_content';
-    IF columnCount < 0 THEN
+    IF columnCount <= 0 THEN
         ALTER TABLE `ckpanda`.`theme_setting`
             ADD COLUMN `footer_content` text DEFAULT NULL AFTER `logo_img_path`,
             ADD COLUMN `welcome_content` text DEFAULT NULL AFTER `footer_content`;
