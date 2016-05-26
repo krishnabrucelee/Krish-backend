@@ -118,7 +118,7 @@ public class DomainServiceImpl implements DomainService {
                 throw new ApplicationException(errors);
             } else if (pingService.apiConnectionCheck(errors)) {
                 // set server for maintain session with configuration values
-                configServer.setServer(1L);
+                configServer.setUserServer();
                 HashMap<String, String> optional = new HashMap<String, String>();
                 String domainResponse = domainService.createDomain(domain.getCompanyNameAbbreviation(), "json",
                         optional);
@@ -197,6 +197,7 @@ public class DomainServiceImpl implements DomainService {
         department.setType(Department.AccountType.DOMAIN_ADMIN);
         department.setIsActive(true);
         optional.put("domainid", String.valueOf(persistedDomain.getUuid()));
+        configServer.setUserServer();
         String accountresponse = csAccountService.createAccount(String.valueOf(CloudStackConstants.CS_DOMAIN_TYPE),
                 persistedDomain.getEmail(), persistedDomain.getPrimaryFirstName(), persistedDomain.getLastName(),
                 department.getUserName(), persistedDomain.getPassword(), "json", optional);
@@ -238,6 +239,7 @@ public class DomainServiceImpl implements DomainService {
         this.syncUpdateUserRole(updatedUser);
         optional.clear();
         optional.put("password", password);
+        configServer.setUserServer();
         String userresponse = csUserService.updateUser(user.getUuid(), optional, "json");
         JSONObject updateUserJSON = new JSONObject(userresponse).getJSONObject("updateuserresponse");
         LOGGER.debug("Department created : " + department.getUserName());
@@ -281,7 +283,7 @@ public class DomainServiceImpl implements DomainService {
                 HashMap<String, String> domainMap = new HashMap<String, String>();
                 domainMap.put("name", domain.getCompanyNameAbbreviation());
                 // set server for maintain session with configuration values
-                configServer.setServer(1L);
+                configServer.setUserServer();
                 String updateDomainResponse = domainService.updateDomain(domain.getUuid(), "json", domainMap);
                 JSONObject updateDomainResponseJSON = new JSONObject(updateDomainResponse)
                         .getJSONObject("updatedomainresponse");
@@ -375,10 +377,11 @@ public class DomainServiceImpl implements DomainService {
             domain.setIsActive(false);
             domain.setStatus(Domain.Status.INACTIVE);
             if (domain.getSyncFlag()) {
-                configServer.setServer(1L);
+                configServer.setUserServer();
                 // Deleting default department with its user while before deleting a domain.
                 List<Department> departmentList = deptService.findAllByDomainAccountTypeAndIsActive(domain.getId(), true, AccountType.DOMAIN_ADMIN);
                 for (Department department : departmentList) {
+                    configServer.setUserServer();
                     String departmentResponse = csAccountService.deleteAccount(department.getUuid(), CloudStackConstants.JSON);
                     JSONObject jobId = new JSONObject(departmentResponse).getJSONObject(CloudStackConstants.CS_DELETE_ACCOUNT_RESPONSE);
                     if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
@@ -389,7 +392,7 @@ public class DomainServiceImpl implements DomainService {
                     for (User user : userList) {
                         user.setIsActive(false);
                         user.setStatus(User.Status.DELETED);
-                        configServer.setServer(1L);
+                        configServer.setUserServer();
                         csUserService.deleteUser((user.getUuid()), CloudStackConstants.JSON);
                         user.setSyncFlag(false);
                         userService.save(user);
@@ -400,6 +403,7 @@ public class DomainServiceImpl implements DomainService {
                     deptService.save(department);
                }
                 // After deleting all the resources going to delete domain.
+                configServer.setUserServer();
                 String deleteResponse = domainService.deleteDomain(domain.getUuid(),CloudStackConstants.JSON);
                 JSONObject deleteJobId = new JSONObject(deleteResponse).getJSONObject("deletedomainresponse");
                 domain.setIsActive(false);
