@@ -384,8 +384,10 @@ public class VolumeServiceImpl implements VolumeService {
                     volume.setStatus(volumeCS.getStatus());
                 }
             }
+        }else {
+            return volumeRepo.save(volume);
         }
-        return volumeRepo.save(volume);
+        return volume;
     }
 
     @Override
@@ -404,8 +406,10 @@ public class VolumeServiceImpl implements VolumeService {
                     volume.setStatus(volumeCS.getStatus());
                 }
             }
+        }else {
+            return volumeRepo.save(volume);
         }
-        return volumeRepo.save(volume);
+        return volume;
     }
 
     @Override
@@ -421,8 +425,10 @@ public class VolumeServiceImpl implements VolumeService {
                     volume = volumeRepo.findByUUID(volumeCS.getUuid());
                 }
             }
+        }else {
+            return volumeRepo.save(volume);
         }
-        return volumeRepo.save(volume);
+        return volume;
     }
 
     @Override
@@ -927,8 +933,12 @@ public class VolumeServiceImpl implements VolumeService {
         if (volume.getIsShrink() != null) {
             optional.put(CS_SHRINK_OK, volume.getIsShrink().toString());
         }
+        if (volume.getStorageOfferingId() != null) {
+            optional.put(CloudStackConstants.CS_DISK_OFFERING_ID,
+                    convertEntityService.getStorageOfferingById(volume.getStorageOfferingId()));
+        }
         config.setUserServer();
-        String volumeS = csVolumeService.resizeVolume(volume.getUuid(), volume.getStorageOffering().getUuid(),
+        String volumeS = csVolumeService.resizeVolume(volume.getUuid(),
                 CloudStackConstants.JSON, optional);
         JSONObject jobId = new JSONObject(volumeS).getJSONObject(CS_RESIZE_VOLUME_RESPONSE);
         if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
@@ -943,20 +953,15 @@ public class VolumeServiceImpl implements VolumeService {
                         .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
                 if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
                         .equals(CloudStackConstants.ERROR_JOB_STATUS)) {
-                    volume.setEventMessage(jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
+                    errors = this.validateEvent(errors, jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
                             .getString(CloudStackConstants.CS_ERROR_TEXT));
+                    throw new ApplicationException(errors);
                 }
                 if (jobresult.has(CloudStackConstants.CS_JOB_RESULT)) {
                     if (jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT).has(CS_VOLUME)) {
                         volume.setUuid((String) jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
                                 .getJSONObject(CS_VOLUME).get(CloudStackConstants.CS_ID));
                     }
-                }
-                if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
-                        .equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
-                    volume.setStatus(Status.READY);
-                    volume.setDiskSize(jobresult.getLong(CloudStackConstants.CS_SIZE));
-                    volume.setDiskSizeFlag(true);
                 }
             }
         }

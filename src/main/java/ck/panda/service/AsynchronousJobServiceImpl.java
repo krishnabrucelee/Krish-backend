@@ -1085,7 +1085,8 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     public void asyncVolume(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
         if (eventObject.getString("commandEventType").equals("VOLUME.CREATE")
-                || eventObject.getString("commandEventType").equals("VOLUME.UPLOAD")) {
+                || eventObject.getString("commandEventType").equals("VOLUME.UPLOAD")
+                || eventObject.getString("commandEventType").equals("VOLUME.RESIZE")) {
             Errors errors = null;
             Volume volume = Volume.convert(jobResult.getJSONObject("volume"));
             volume.setIsSyncFlag(false);
@@ -1142,6 +1143,15 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                                 volume.getDepartmentId(), CS_Department, Update);
                     }
             }
+            if (eventObject.getString("commandEventType").equals("VOLUME.RESIZE")) {
+                volume.setUuid((String) jobResult.getJSONObject("volume").get(CloudStackConstants.CS_ID));
+                Volume resize = volumeService.findByUUID(volume.getUuid());
+                resize.setStatus(Status.READY);
+                resize.setDiskSize(jobResult.getJSONObject("volume").getLong(CloudStackConstants.CS_SIZE));
+                resize.setDiskSizeFlag(true);
+                resize.setStorageOfferingId(volume.getStorageOfferingId());
+                volumeService.update(resize);
+            }
         }
         if (eventObject.getString("commandEventType").equals("VOLUME.ATTACH")
                 || eventObject.getString("commandEventType").equals("VOLUME.DETACH")) {
@@ -1181,6 +1191,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
 
             }
         }
+
     }
 
     /**
