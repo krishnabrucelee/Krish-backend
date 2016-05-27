@@ -762,4 +762,7 @@ public class CloudStackConstants {
     /** Constant for physical network id. */
     public static final String CS_PHYSICAL_NETWORK_ID = "physicalnetworkid";
 
+    /** Constant for shared network. */
+    public static final String CS_SHARED = "Shared";
+
 }

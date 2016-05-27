@@ -1690,7 +1690,17 @@ public class SyncServiceImpl implements SyncService {
                     String encryptedPassword = new String(EncryptionUtil.encrypt(csVm.getPassword(), originalKey));
                     instance.setVncPassword(encryptedPassword);
                 }
-                IpAddress ipAddress = ipService.UpdateIPByNetwork(convertEntityService.getNetworkById(instance.getNetworkId()).getUuid());
+                LOGGER.debug("Instance uuid : "+instance.getUuid());
+                LOGGER.debug("Instance Network ID : "+instance.getNetworkId());
+                Network network = convertEntityService.getNetworkById(instance.getNetworkId());
+                IpAddress ipAddress = null;
+                if (network == null) {
+                    LOGGER.debug("Network uuid : null");
+                } else {
+                    LOGGER.debug("Network uuid : "+instance.getUuid());
+                    ipAddress = ipService.UpdateIPByNetwork(network.getUuid());
+                }
+                LOGGER.debug("================================");
                 if (ipAddress != null) {
                     instance.setPublicIpAddress(ipAddress.getPublicIpAddress());
                     instance.setInstancePublicIp(ipToLong(ipAddress.getPublicIpAddress()));

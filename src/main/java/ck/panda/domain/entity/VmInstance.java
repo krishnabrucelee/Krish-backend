@@ -2084,62 +2084,62 @@ public class VmInstance implements Serializable {
     }
 
     /**
-	 * @return the instancePublicIp
-	 */
-	public Long getInstancePublicIp() {
-		return instancePublicIp;
-	}
+     * @return the instancePublicIp
+     */
+    public Long getInstancePublicIp() {
+        return instancePublicIp;
+    }
 
-	/**
-	 * @return the instanceGuestIp
-	 */
-	public Long getInstanceGuestIp() {
-		return instanceGuestIp;
-	}
+    /**
+     * @return the instanceGuestIp
+     */
+    public Long getInstanceGuestIp() {
+        return instanceGuestIp;
+    }
 
-	/**
-	 * @return the instanceUserName
-	 */
-	public String getInstanceUserName() {
-		return instanceUserName;
-	}
+    /**
+     * @return the instanceUserName
+     */
+    public String getInstanceUserName() {
+        return instanceUserName;
+    }
 
-	/**
-	 * @return the instanceOsType
-	 */
-	public String getInstanceOsType() {
-		return instanceOsType;
-	}
+    /**
+     * @return the instanceOsType
+     */
+    public String getInstanceOsType() {
+        return instanceOsType;
+    }
 
-	/**
-	 * @param instancePublicIp the instancePublicIp to set
-	 */
-	public void setInstancePublicIp(Long instancePublicIp) {
-		this.instancePublicIp = instancePublicIp;
-	}
+    /**
+     * @param instancePublicIp the instancePublicIp to set
+     */
+    public void setInstancePublicIp(Long instancePublicIp) {
+        this.instancePublicIp = instancePublicIp;
+    }
 
-	/**
-	 * @param instanceGuestIp the instanceGuestIp to set
-	 */
-	public void setInstanceGuestIp(Long instanceGuestIp) {
-		this.instanceGuestIp = instanceGuestIp;
-	}
+    /**
+     * @param instanceGuestIp the instanceGuestIp to set
+     */
+    public void setInstanceGuestIp(Long instanceGuestIp) {
+        this.instanceGuestIp = instanceGuestIp;
+    }
 
-	/**
-	 * @param instanceUserName the instanceUserName to set
-	 */
-	public void setInstanceUserName(String instanceUserName) {
-		this.instanceUserName = instanceUserName;
-	}
+    /**
+     * @param instanceUserName the instanceUserName to set
+     */
+    public void setInstanceUserName(String instanceUserName) {
+        this.instanceUserName = instanceUserName;
+    }
 
-	/**
-	 * @param instanceOsType the instanceOsType to set
-	 */
-	public void setInstanceOsType(String instanceOsType) {
-		this.instanceOsType = instanceOsType;
-	}
+    /**
+     * @param instanceOsType the instanceOsType to set
+     */
+    public void setInstanceOsType(String instanceOsType) {
+        this.instanceOsType = instanceOsType;
+    }
 
-	@Override
+    @Override
     public String toString() {
         return "VmInstance [Id=" + id + ", name=" + name + ", uuid=" + uuid + ", vncPassword=" + vncPassword
                 + ", instanceOwner=" + instanceOwner + ", instanceOwnerId=" + instanceOwnerId + ", application="
@@ -2193,6 +2193,15 @@ public class VmInstance implements Serializable {
             vmInstance.setTransIsoId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ISO_ID));
             vmInstance.setDisplayName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DISPLAY_NAME));
             JSONArray nicArray = jsonObject.getJSONArray(CloudStackConstants.CS_NIC);
+            //Shared network can't return IP address
+            if (JsonUtil.getStringValue(nicArray.getJSONObject(0), CloudStackConstants.CS_TYPE)
+                    .equalsIgnoreCase(CloudStackConstants.CS_SHARED)) {
+                vmInstance.setIpAddress(
+                        JsonUtil.getStringValue(nicArray.getJSONObject(0), CloudStackConstants.CS_GATEWAY));
+            } else {
+                vmInstance.setIpAddress(
+                        JsonUtil.getStringValue(nicArray.getJSONObject(0), CloudStackConstants.CS_IP_ADDRESS));
+            }
             vmInstance.setIpAddress(
                     JsonUtil.getStringValue(nicArray.getJSONObject(0), CloudStackConstants.CS_IP_ADDRESS));
             vmInstance.setTransNetworkId(
