@@ -115,6 +115,9 @@ public class IpaddressServiceImpl implements IpaddressService {
     @Autowired
     private EgressRuleService egressRuleService;
 
+    @Autowired
+    private ProjectService projectService;
+
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
@@ -415,8 +418,17 @@ public class IpaddressServiceImpl implements IpaddressService {
                 if(ipAddress.getTransVpcId() != null) {
                     ipAddress.setVpcId(convertEntityService.getVpcId(ipAddress.getTransVpcId()));
                 }
-                ipAddress.setProjectId(convertEntityService.getProjectId(ipAddress.getTransProjectId()));
 
+                if((convertEntityService.getProjectId(ipAddress.getTransProjectId())) != null) {
+                    ipAddress.setProjectId(convertEntityService.getProjectId(ipAddress.getTransProjectId()));
+                    ipAddress.setDepartmentId(projectService.find(ipAddress.getProjectId()).getDepartmentId());
+                }
+                else {
+                    if(ipAddress.getDepartmentId() != null ) {
+                      ipAddress.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
+                              ipAddress.getTransDepartmentId(), convertEntityService.getDomain(ipAddress.getTransDomainId())));
+                    }
+                }
                 //Get all the VPN details
                 HashMap<String, String> vpnOptional = new HashMap<String, String>();
                 vpnOptional.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
@@ -467,10 +479,19 @@ public class IpaddressServiceImpl implements IpaddressService {
                 ipAddress.setDomainId(convertEntityService.getDomainId(ipAddress.getTransDomainId()));
                 ipAddress.setZoneId(convertEntityService.getZoneId(ipAddress.getTransZoneId()));
                 ipAddress.setNetworkId(convertEntityService.getNetworkId(ipAddress.getTransNetworkId()));
+                if((convertEntityService.getProjectId(ipAddress.getTransProjectId())) != null) {
+                    ipAddress.setProjectId(convertEntityService.getProjectId(ipAddress.getTransProjectId()));
+                    ipAddress.setDepartmentId(projectService.find(ipAddress.getProjectId()).getDepartmentId());
+                }
+                else {
+                    if(ipAddress.getTransDepartmentId() != null ) {
+                      ipAddress.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
+                              ipAddress.getTransDepartmentId(), convertEntityService.getDomain(ipAddress.getTransDomainId())));
+                    }
+                }
                 if (ipAddress.getTransVpcId() != null) {
                     ipAddress.setVpcId(convertEntityService.getVpcId(ipAddress.getTransVpcId()));
                 }
-                ipAddress.setProjectId(convertEntityService.getProjectId(ipAddress.getTransProjectId()));
                 IpAddress ipAddresses = ipRepo.findByUUID(ipAddress.getUuid());
                 if (ipAddresses != null) {
                     ipAddresses.setUuid(ipAddress.getUuid());
