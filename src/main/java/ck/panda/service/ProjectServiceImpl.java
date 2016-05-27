@@ -23,7 +23,6 @@ import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
-import ck.panda.domain.entity.VpnUser;
 import ck.panda.domain.repository.jpa.ProjectRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackProjectService;
@@ -99,11 +98,11 @@ public class ProjectServiceImpl implements ProjectService {
     @Autowired
     private TokenDetails tokenDetails;
 
-    /** Network Service Reference */
+    /** Network Service Reference. */
     @Autowired
     private NetworkService networkService;
 
-    /** Sshkey service reference */
+    /** Sshkey service reference. */
     @Autowired
     private SSHKeyService sshKeyService;
 
@@ -142,7 +141,10 @@ public class ProjectServiceImpl implements ProjectService {
                 } else {
                     project.setUuid(csProject.getString(CloudStackConstants.CS_ID));
                     // Set the project owner.
-                    users.add(convertEntityService.getOwnerById(project.getProjectOwnerId()));
+                    if (project.getProjectOwnerId() != null) {
+                     // Set the project owner.
+                     users.add(convertEntityService.getOwnerById(project.getProjectOwnerId()));
+                    }
                     // Give the access to project owner.
                     project.setUserList(users);
                     config.setUserServer();
@@ -166,20 +168,20 @@ public class ProjectServiceImpl implements ProjectService {
                 }
             }
         }
-        // Save the entity with uuid for created new project in CS.
-        project = projectRepository.save(project);
+
+        Project persistsProject = projectRepository.save(project);
         if (project.getSyncFlag()) {
             for (String keys : convertEntityService.getResourceTypeValue().keySet()) {
                 ResourceLimitProject persistProject = resourceProjectService
-                        .findByProjectAndResourceType(project.getId(), ResourceLimitProject.ResourceType
+                        .findByProjectAndResourceType(persistsProject.getId(), ResourceLimitProject.ResourceType
                                 .valueOf(convertEntityService.getResourceTypeValue().get(keys)), true);
                 if (persistProject != null) {
                     resourceProjectService.delete(persistProject);
                 }
                 ResourceLimitProject resourceLimitProject = new ResourceLimitProject();
-                resourceLimitProject.setDepartmentId(project.getDepartmentId());
-                resourceLimitProject.setDomainId(project.getDomainId());
-                resourceLimitProject.setProjectId(project.getId());
+                resourceLimitProject.setDepartmentId(persistsProject.getDepartmentId());
+                resourceLimitProject.setDomainId(persistsProject.getDomainId());
+                resourceLimitProject.setProjectId(persistsProject.getId());
                 resourceLimitProject.setMax(0L);
                 resourceLimitProject.setAvailable(0L);
                 resourceLimitProject.setUsedLimit(0L);
@@ -190,7 +192,7 @@ public class ProjectServiceImpl implements ProjectService {
                 resourceProjectService.update(resourceLimitProject);
             }
         }
-        return project;
+        return persistsProject;
     }
 
     @Override
