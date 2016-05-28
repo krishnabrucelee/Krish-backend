@@ -363,7 +363,10 @@ public class NicServiceImpl implements NicService {
             configServer.setServer(1L);
             // 1. Get the list of nics from CS server using CS connector
             String response = cloudStackNicService.listNics(nicMap, CloudStackConstants.JSON);
-            JSONArray nicListJSON = new JSONObject(response).getJSONObject(CS_NIC_LIST).getJSONArray(CS_NIC);
+
+            JSONObject nicJSON = new JSONObject(response).getJSONObject(CS_NIC_LIST);
+            if (nicJSON.has(CS_NIC)) {
+            JSONArray nicListJSON = (JSONArray) nicJSON.get(CS_NIC);
             // 2. Iterate the json list, convert the single json entity to nic
             for (int i = 0, size = nicListJSON.length(); i < size; i++) {
                  List<VmIpaddress> vmIpList = new ArrayList<VmIpaddress>();
@@ -422,6 +425,7 @@ public class NicServiceImpl implements NicService {
                     nic.setVmIpAddress(vmIpList);
                 }
                 nicList.add(nic);
+            }
             }
         }
         return nicList;

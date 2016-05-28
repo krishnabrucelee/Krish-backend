@@ -2195,9 +2195,10 @@ public class VmInstance implements Serializable {
             JSONArray nicArray = jsonObject.getJSONArray(CloudStackConstants.CS_NIC);
             //Shared network can't return IP address
             if (JsonUtil.getStringValue(nicArray.getJSONObject(0), CloudStackConstants.CS_TYPE)
-                    .equalsIgnoreCase(CloudStackConstants.CS_SHARED)) {
+                    .equalsIgnoreCase(CloudStackConstants.CS_SHARED) && !jsonObject.has(CloudStackConstants.CS_IP_ADDRESS)) {
                 vmInstance.setIpAddress(
                         JsonUtil.getStringValue(nicArray.getJSONObject(0), CloudStackConstants.CS_GATEWAY));
+
             } else {
                 vmInstance.setIpAddress(
                         JsonUtil.getStringValue(nicArray.getJSONObject(0), CloudStackConstants.CS_IP_ADDRESS));

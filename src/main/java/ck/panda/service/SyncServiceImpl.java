@@ -1848,7 +1848,7 @@ public class SyncServiceImpl implements SyncService {
         // Update instance disk size from volume
         List<Volume> listVolume = volumeService.findAll();
         for (int j = 0; j < listVolume.size(); j++) {
-            if (listVolume.get(j).getVolumeType() == VolumeType.ROOT) {
+            if (listVolume.get(j).getVolumeType() == VolumeType.ROOT && listVolume.get(j).getVmInstanceId() != null) {
                 VmInstance vmInstance = virtualMachineService.find(listVolume.get(j).getVmInstanceId());
                 vmInstance.setVolumeSize(listVolume.get(j).getDiskSize());
                 virtualMachineService.update(vmInstance);
