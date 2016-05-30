@@ -883,8 +883,22 @@ public class ComputeOffering implements Serializable {
             compute.setNumberOfCores(JsonUtil.getIntegerValue(object, "cpunumber"));
             compute.setStorageType(StorageType.valueOf(JsonUtil.getStringValue(object, "storagetype")));
             compute.setIsHighAvailabilityEnabled(JsonUtil.getBooleanValue(object, "offerha"));
+            compute.setHostTags(JsonUtil.getStringValue(object, "hosttags"));
+            compute.setStorageTags(JsonUtil.getStringValue(object, "tags"));
+            compute.setDiskBytesReadRate(JsonUtil.getIntegerValue(object, "diskBytesReadRate"));
+            compute.setDiskBytesWriteRate(JsonUtil.getIntegerValue(object, "diskBytesWriteRate"));
+            compute.setDiskIopsReadRate(JsonUtil.getIntegerValue(object, "diskIopsReadRate"));
+            compute.setDiskIopsWriteRate(JsonUtil.getIntegerValue(object, "diskIopsWriteRate"));
+            compute.setMinIops(JsonUtil.getIntegerValue(object, "miniops"));
+            compute.setMaxIops(JsonUtil.getIntegerValue(object, "maxiops" ));
+            if((compute.getDiskBytesReadRate() != null || compute.getDiskBytesWriteRate() != null || compute.getDiskIopsReadRate() != null || compute.getDiskIopsWriteRate()!= null) )
+            {
+                 compute.setQosType(QosType.HYPERVISOR);
+            }
+            else if((compute.getMinIops() != null || compute.getMaxIops() != null)) {
+                compute.setQosType(QosType.STORAGE);
+            }
             compute.setIsActive(true);
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }

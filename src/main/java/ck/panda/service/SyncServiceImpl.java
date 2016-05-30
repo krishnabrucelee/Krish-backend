@@ -738,7 +738,7 @@ public class SyncServiceImpl implements SyncService {
         }
         try {
             // 27. Sync ResourceLimit entity
-            this.syncResourceLimit();
+           // this.syncResourceLimit();
         } catch (Exception e) {
             LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
         }
@@ -1436,7 +1436,15 @@ public class SyncServiceImpl implements SyncService {
 
                 computeOffering.setName(csComputeService.getName());
                 computeOffering.setDisplayText(csComputeService.getDisplayText());
-
+                computeOffering.setStorageTags(csComputeService.getStorageTags());
+                computeOffering.setHostTags(csComputeService.getStorageTags());
+                computeOffering.setDiskBytesReadRate(csComputeService.getDiskBytesReadRate());
+                computeOffering.setDiskBytesWriteRate(csComputeService.getDiskBytesWriteRate());
+                computeOffering.setDiskIopsReadRate(csComputeService.getDiskIopsReadRate());
+                computeOffering.setDiskIopsWriteRate(csComputeService.getDiskIopsWriteRate());
+                computeOffering.setMinIops(csComputeService.getMinIops());
+                computeOffering.setMaxIops(csComputeService.getMaxIops());
+                computeOffering.setQosType(csComputeService.getQosType());
                 // 3.2 If found, update the compute offering object in app db
                 computeService.update(computeOffering);
 
