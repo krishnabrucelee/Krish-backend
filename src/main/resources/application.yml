@@ -8,8 +8,6 @@ spring:
         testWhileIdle: true
         timeBetweenEvictionRunsMillis: 3625000
         validationQuery: SELECT 1
-    freemarker:
-        check-template-location: ${CHECK_TEMPLATE_LOCATION:false}
 
 
     jpa:
@@ -107,13 +105,6 @@ logging:
 server:
     port: ${PANDA_PORT:8080}
     session-timeout: 60
-    ssl:
-        key-store: ${KEY_STORE}
-        key-store-password: ${KEY_STORE_PASSWORD}
-        key-password: ${KEY_PASSWORD}
-        enabled: ${KEY_ENABLED}
-        key-alias: ${KEY_ALIAS}
-        protocol: ${KEY_PROTOCOL}
 
 ---
 
