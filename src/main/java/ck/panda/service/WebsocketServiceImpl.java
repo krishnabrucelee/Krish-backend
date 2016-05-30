@@ -216,40 +216,9 @@ public class WebsocketServiceImpl implements WebsocketService {
                                     .equalsIgnoreCase(CloudStackConstants.CS_STATUS_FAILED)) {
                                 Volume persistVolume = volumeService.findByUUID(json.getString(VolumeId));
                                 if (persistVolume != null) {
-                                    HashMap<String, String> volumeMap = new HashMap<String, String>();
-                                    config.setServer(1L);
-                                    volumeMap.put(CloudStackConstants.CS_ID, json.getString(VolumeId));
-                                    String response = csVolumeService.listVolumes(CloudStackConstants.JSON, volumeMap);
-                                    JSONArray volumeListJSON = null;
-                                    JSONObject responseObject = new JSONObject(response)
-                                            .getJSONObject(CS_LIST_VOLUME_RESPONSE);
-                                    if (responseObject.has(CS_VOLUME)) {
-                                        volumeListJSON = responseObject.getJSONArray(CS_VOLUME);
-                                        Volume volume = Volume.convert(volumeListJSON.getJSONObject(0));
-                                        persistVolume
-                                                .setZoneId(convertEntityService.getZoneId(volume.getTransZoneId()));
-                                        persistVolume.setDomainId(
-                                                convertEntityService.getDomainId(volume.getTransDomainId()));
-                                        persistVolume.setStorageOfferingId(convertEntityService
-                                                .getStorageOfferId(volume.getTransStorageOfferingId()));
-                                        persistVolume.setVmInstanceId(
-                                                convertEntityService.getVmInstanceId(volume.getTransvmInstanceId()));
-                                        if (volume.getTransProjectId() != null) {
-                                            persistVolume.setProjectId(
-                                                    convertEntityService.getProjectId(volume.getTransProjectId()));
-                                            persistVolume.setDepartmentId(
-                                                    projectService.find(volume.getProjectId()).getDepartmentId());
-                                        } else {
-                                            // departmentRepository.findByUuidAndIsActive(volume.getTransDepartmentId(),
-                                            // true);
-                                            Domain domain = domainService.find(volume.getDomainId());
-                                            persistVolume.setDepartmentId(
-                                                    convertEntityService.getDepartmentByUsernameAndDomains(
-                                                            volume.getTransDepartmentId(), domain));
-                                        }
-                                        persistVolume.setIsSyncFlag(false);
-                                        volumeService.update(persistVolume);
-                                    }
+                                    persistVolume.setVmInstanceId(null);
+                                    persistVolume.setIsSyncFlag(false);
+                                    volumeService.save(persistVolume);
                                 }
                             }
                         }

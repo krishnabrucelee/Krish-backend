@@ -1690,7 +1690,17 @@ public class SyncServiceImpl implements SyncService {
                     String encryptedPassword = new String(EncryptionUtil.encrypt(csVm.getPassword(), originalKey));
                     instance.setVncPassword(encryptedPassword);
                 }
-                IpAddress ipAddress = ipService.UpdateIPByNetwork(convertEntityService.getNetworkById(instance.getNetworkId()).getUuid());
+                LOGGER.debug("Instance uuid : "+instance.getUuid());
+                LOGGER.debug("Instance Network ID : "+instance.getNetworkId());
+                Network network = convertEntityService.getNetworkById(instance.getNetworkId());
+                IpAddress ipAddress = null;
+                if (network == null) {
+                    LOGGER.debug("Network uuid : null");
+                } else {
+                    LOGGER.debug("Network uuid : "+instance.getUuid());
+                    ipAddress = ipService.UpdateIPByNetwork(network.getUuid());
+                }
+                LOGGER.debug("================================");
                 if (ipAddress != null) {
                     instance.setPublicIpAddress(ipAddress.getPublicIpAddress());
                     instance.setInstancePublicIp(ipToLong(ipAddress.getPublicIpAddress()));
@@ -1838,7 +1848,7 @@ public class SyncServiceImpl implements SyncService {
         // Update instance disk size from volume
         List<Volume> listVolume = volumeService.findAll();
         for (int j = 0; j < listVolume.size(); j++) {
-            if (listVolume.get(j).getVolumeType() == VolumeType.ROOT) {
+            if (listVolume.get(j).getVolumeType() == VolumeType.ROOT && listVolume.get(j).getVmInstanceId() != null) {
                 VmInstance vmInstance = virtualMachineService.find(listVolume.get(j).getVmInstanceId());
                 vmInstance.setVolumeSize(listVolume.get(j).getDiskSize());
                 virtualMachineService.update(vmInstance);
@@ -2738,7 +2748,16 @@ public class SyncServiceImpl implements SyncService {
                 ipAddress.setVpnPresharedKey(csIp.getVpnPresharedKey());
                 ipAddress.setVpnState(csIp.getVpnState());
                 ipAddress.setVpnForDisplay(csIp.getVpnForDisplay());
-
+                if	(csIp.getDomainId() != null) {
+                    ipAddress.setDomainId(csIp.getDomainId());
+                }
+                if( csIp.getProjectId() != null) {
+                    ipAddress.setProjectId(csIp.getProjectId());
+                     ipAddress.setDepartmentId(csIp.getDepartmentId());
+                }
+                else if(csIp.getDepartmentId() != null) {
+                    ipAddress.setDepartmentId(csIp.getDepartmentId());
+                }
                 // 3.2 If found, update the nic object in app db
                 ipAddressService.update(ipAddress);
 

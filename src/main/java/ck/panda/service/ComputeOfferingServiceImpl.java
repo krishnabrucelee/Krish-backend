@@ -119,7 +119,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
                 throw new ApplicationException(errors);
             } else if (pingService.apiConnectionCheck(errors)) {
                 // set server for maintain session with configuration values
-                cscomputeOffering.setServer(configServer.setServer(1L));
+                configServer.setUserServer();
                 // create compute offering in ACS and getting response in Json String.
                 String createComputeResponse = cscomputeOffering.createComputeOffering(compute.getName(),
                         compute.getDisplayText(),CloudStackConstants.JSON, addOptionalValues(compute));
@@ -165,7 +165,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
                 throw new ApplicationException(errors);
             } else if (pingService.apiConnectionCheck(errors)) {
                 HashMap<String, String> optionalParams = new HashMap<String, String>();
-                cscomputeOffering.setServer(configServer.setServer(1L));
+                configServer.setUserServer();
                 // update compute offering in ACS and getting response in Json String.
                 String editComputeResponse = cscomputeOffering.updateComputeOffering(compute.getUuid(),
                         compute.getName(), compute.getDisplayText(), CloudStackConstants.JSON, optionalParams);
@@ -204,7 +204,6 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             Errors errors = validator.rejectIfNullEntity(CS_COMPUTE, compute);
             errors = validator.validateEntity(compute, errors);
             // set server for finding value in configuration
-            cscomputeOffering.setServer(configServer.setServer(1L));
             List<VmInstance> vmResponse = vmService.findAllByComputeOfferingIdAndVmStatus(compute.getId(),
                     VmInstance.Status.EXPUNGING);
             if (vmResponse.size() != 0) {
@@ -215,6 +214,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             } else {
                 compute.setIsActive(false);
                 // update compute offering in ACS.
+                configServer.setUserServer();
                 cscomputeOffering.deleteComputeOffering(compute.getUuid(),CloudStackConstants.JSON);
             }
         }
