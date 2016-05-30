@@ -738,7 +738,7 @@ public class SyncServiceImpl implements SyncService {
         }
         try {
             // 27. Sync ResourceLimit entity
-           // this.syncResourceLimit();
+            this.syncResourceLimit();
         } catch (Exception e) {
             LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
         }
