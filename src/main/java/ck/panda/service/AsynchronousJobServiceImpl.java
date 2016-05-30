@@ -1470,7 +1470,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             if (vpc != null) {
                 vpc.setSyncFlag(false);
                 vpc.setIsActive(false);
-                                vpc.setStatus(VPC.Status.INACTIVE);
+                vpc.setStatus(VPC.Status.INACTIVE);
                 vpcService.softDelete(vpc);
                 if (vpc.getProjectId() != null) {
                     updateResourceCountService.QuotaUpdateByResourceObject(vpc, CS_VPC, vpc.getProjectId(), CS_Project,
@@ -1858,6 +1858,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 networkOffering.setDisplayText(csNetworkOffering.getDisplayText());
                 networkOffering.setAvailability(csNetworkOffering.getAvailability());
                 networkOffering.setForVpc(csNetworkOffering.getForVpc());
+                networkOffering.setStatus(csNetworkOffering.getStatus());
                 networkOfferingService.update(networkOffering);
             }
         }

@@ -102,7 +102,7 @@ public interface RoleRepository extends PagingAndSortingRepository<Role, Long> {
      * @param pageable pagination information.
      * @return list of role.
      */
-    @Query(value = "SELECT role FROM Role AS role WHERE (role.domainId = :domainId OR 0 = :domainId) AND (role.name LIKE %:searchText% OR role.department.userName LIKE %:searchText% OR role.description LIKE %:searchText%) AND role.isActive = :isActive")
+    @Query(value = "SELECT role FROM Role AS role LEFT JOIN role.domain WHERE (role.domainId = :domainId OR 0 = :domainId) AND (role.name LIKE %:searchText% OR role.department.userName LIKE %:searchText% OR role.description LIKE %:searchText% OR role.domain.name LIKE %:searchText%) AND role.isActive = :isActive ")
     Page<Role> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, @Param("searchText") String searchText, Pageable pageable);
 
 }

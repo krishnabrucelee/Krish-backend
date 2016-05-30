@@ -456,7 +456,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public Template findByUUID(String uuid) {
-        return templateRepository.findByUUID(uuid, true);
+        return templateRepository.findByUUID(uuid);
     }
 
     @Override

@@ -96,8 +96,8 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param isActive true/false
      * @return template
      */
-    @Query(value = "SELECT template FROM Template template WHERE template.uuid = :uuid AND template.isActive = :isActive")
-    Template findByUUID(@Param("uuid") String uuid, @Param("isActive") Boolean isActive);
+    @Query(value = "SELECT template FROM Template template WHERE template.uuid = :uuid ")
+    Template findByUUID(@Param("uuid") String uuid);
 
     /**
      * Get the template based on the osCategory, architecture, status and without system type.
