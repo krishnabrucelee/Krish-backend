@@ -158,11 +158,10 @@ public class CloudStackVolumeService {
      * @return resize response
      * @throws Exception error
      */
-    public String resizeVolume(String volumeId, String diskOfferingId, String response,
+    public String resizeVolume(String volumeId, String response,
             HashMap<String, String> optional) throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("resizeVolume", optional);
         arguments.add(new NameValuePair("id", volumeId));
-        arguments.add(new NameValuePair("diskofferingid", diskOfferingId));
         arguments.add(new NameValuePair("response", response));
         String resizeResponse = server.request(arguments);
 

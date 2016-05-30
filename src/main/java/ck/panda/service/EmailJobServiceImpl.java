@@ -9,6 +9,8 @@ import java.util.Map;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.mail.MessagingException;
+
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -34,7 +36,10 @@ import ck.panda.email.util.Invoice;
 import ck.panda.email.util.Resource;
 import ck.panda.email.util.Usage;
 import ck.panda.rabbitmq.util.EmailEvent;
+import ck.panda.util.CloudStackDomainService;
+import ck.panda.util.ConfigUtil;
 import ck.panda.util.EncryptionUtil;
+import ck.panda.util.JsonUtil;
 import ck.panda.util.PingService;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -70,6 +75,14 @@ public class EmailJobServiceImpl implements EmailJobService {
     /** User service reference . */
     @Autowired
     private UserService userService;
+
+    /** CloudStack Domain service for connectivity with cloudstack. */
+    @Autowired
+    private CloudStackDomainService cloudStackDomainService;
+
+    /** object(server) created for CloudStackServer. */
+    @Autowired
+    private ConfigUtil configServer;
 
     /** Server email pattern. */
     @Value(value = "${spring.rabbit.server.email.pattern}")
@@ -371,7 +384,20 @@ public class EmailJobServiceImpl implements EmailJobService {
                     domainResult = usageResult.getJSONObject(CloudStackConstants.CS_DOMAIN);
                 }
                 mimeEmail.setFrom(organisationResult.getString(EmailConstants.EMAIL_INVOICE_email));
-                mimeEmail.setTo(domainResult.getString(EmailConstants.EMAIL_INVOICE_email));
+                if (domainResult.getString(CloudStackConstants.CS_NAME).equals("ROOT")) {
+                    HashMap<String, String> domainMap = new HashMap<String, String>();
+                    domainMap.put(CloudStackConstants.CS_ID, domainResult.getString(CloudStackConstants.CS_UUID));
+                    configServer.setServer(1L);
+                    String response = cloudStackDomainService.listDomains(CloudStackConstants.JSON, domainMap);
+                    JSONArray domainListJSON = new JSONObject(response).getJSONObject("listdomainsresponse")
+                            .getJSONArray(CloudStackConstants.CS_DOMAIN);
+                    String level = JsonUtil.getStringValue(domainListJSON.getJSONObject(0), "level");
+                    if (level.equals("0")) {
+                        mimeEmail.setTo(organisationResult.getString(EmailConstants.EMAIL_INVOICE_email));
+                    }
+                } else {
+                    mimeEmail.setTo(domainResult.getString(EmailConstants.EMAIL_INVOICE_email));
+                }
                 HashMap<String, String> fileMap = new HashMap<>();
                 fileMap.put(EmailConstants.EMAIL_INVOICE_fileAttachment,
                         invoiceBasePath + File.separator + usageResult.getString(EmailConstants.EMAIL_INVOICE_filePath)
