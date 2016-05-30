@@ -118,7 +118,7 @@ public class ThemeSettingController extends CRUDController<ThemeSetting> impleme
                         newFile.getAbsolutePath();
                     } else {
                         throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
-                                "Background image resolution should be larger than " + 700 + "x" + 400);
+                                "Background image resolution should be larger than "+ 700 + "x" + 400);
                     }
                 }
             }
@@ -154,7 +154,7 @@ public class ThemeSettingController extends CRUDController<ThemeSetting> impleme
                         newFile.getAbsolutePath();
                     } else {
                         throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
-                                "Logo image resolution should be smaller than " + 180 + "x" + 55);
+                                "Logo image resolution should be smaller than "+ 180 + "x" + 55);
                     }
                 }
             }
