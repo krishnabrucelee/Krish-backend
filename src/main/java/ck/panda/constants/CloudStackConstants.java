@@ -765,4 +765,19 @@ public class CloudStackConstants {
     /** Constant for shared network. */
     public static final String CS_SHARED = "Shared";
 
+    /** Constant for disk Bytes Read Rate. */
+    public static final String CS_DISK_BYTES_READ = "diskBytesReadRate";
+
+    /** Constant for disk Bytes Write Rate. */
+    public static final String CS_DISK_BYTES_WRITE = "diskBytesWriteRate";
+
+    /** Constant for disk Iops Read Rate. */
+    public static final String CS_DISK_IOPS_READ = "diskIopsReadRate";
+
+    /** Constant for disk Iops Write Rate. */
+    public static final String CS_DISK_IOPS_WRITE = "diskIopsWriteRate";
+
+    /** Constant for provisioning type. */
+    public static final String CS_PROVISIONING_TYPE = "provisioningtype";
+
 }

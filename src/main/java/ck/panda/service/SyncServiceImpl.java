@@ -1205,7 +1205,15 @@ public class SyncServiceImpl implements SyncService {
                 if (csStorageOffering.getTransDomainId() != null && convertEntityService.getDomain(csStorageOffering.getTransDomainId()) != null){
                     storageOffering.setDomainId(convertEntityService.getDomain(csStorageOffering.getTransDomainId()).getId());
                 }
-
+                storageOffering.setStorageTags(csStorageOffering.getStorageTags());
+                storageOffering.setDiskBytesReadRate(csStorageOffering.getDiskBytesReadRate());
+                storageOffering.setDiskBytesWriteRate(csStorageOffering.getDiskBytesWriteRate());
+                storageOffering.setDiskIopsReadRate(csStorageOffering.getDiskIopsReadRate());
+                storageOffering.setDiskIopsWriteRate(csStorageOffering.getDiskIopsWriteRate());
+                storageOffering.setDiskMaxIops(csStorageOffering.getDiskMaxIops());
+                storageOffering.setDiskMinIops(csStorageOffering.getDiskMinIops());
+                storageOffering.setQosType(csStorageOffering.getQosType());
+                storageOffering.setProvisioningType(csStorageOffering.getProvisioningType());
                 // 3.2 If found, update the osType object in app db
                 storageService.update(storageOffering);
 
