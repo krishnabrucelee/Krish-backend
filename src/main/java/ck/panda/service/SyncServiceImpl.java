@@ -574,311 +574,311 @@ public class SyncServiceImpl implements SyncService {
     @Override
     public void sync() throws Exception {
 
-//
-//        try {
-//            // 1. Sync manual sync items
-//            this.syncManualImportData();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Manual Import Data", e);
-//        }
-//        try {
-//            // 2. Sync Region entity
-//            this.syncRegion("EXECUTE");
-//        } catch (Exception e) {
-//            Errors errors = new Errors(messageSource);
-//            errors.addGlobalError(
-//                    "Either of URL or API key or Secret key is wrong. please provide correct values and proceed ");
-//            if (errors.hasErrors()) {
-//                throw new ApplicationException(errors);
-//            }
-//        }
-//        try {
-//            // 3. Sync Zone entity
-//            this.syncZone();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Zone", e);
-//        }
-//        try {
-//            // 4. Sync Domain entity
-//            this.syncDomain();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Domaim", e);
-//        }
-//        try {
-//            // 5. Sync Pod entity
-//            this.syncPod();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Pod", e);
-//        }
-//        try {
-//            // 6. Sync Cluster entity
-//            this.syncCluster();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch cluster", e);
-//        }
-//        try {
-//            // 7. Sync Host entity
-//            this.syncHost();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Host", e);
-//        }
-//        try {
-//            // 8. Sync Hypervisor entity
-//            this.syncHypervisor();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Hypervisor", e);
-//        }
-//        try {
-//            // 9. Sync Department entity
-//            this.syncDepartment();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Department", e);
-//        }
-//        try {
-//            // 10. Sync User entity
-//            this.syncUser();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch User", e);
-//        }
-//        try {
-//            // 11. Sync Project entity
-//            this.syncProject();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT sync Project", e);
-//        }
-//        try {
-//            // 12. Sync OSCategory entity
-//            this.syncOsCategory();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch OS Category", e);
-//        }
-//        try {
-//            // 13. Sync OSType entity.
-//            this.syncOsTypes();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch OS Types", e);
-//        }
-//        try {
-//            // 14. Sync physical network entity
-//            this.syncPhysicalNetwork();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch VPC offering", e);
-//        }
-//        try {
-//            // 15. Sync network service provider entity
-//            this.syncNetworkServiceProvider();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch VPC offering", e);
-//        }
-//        try {
-//            // 16. Sync supported network entity
-//            this.syncSupportedNetwork();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch VPC offering", e);
-//        }
-//        try {
-//            // 17. Sync Network offering entity
-//            this.syncNetworkOffering();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch NetworkOffering", e);
-//        }
-//        try {
-//            // 18. Sync Compute Offering entity
-//            this.syncComputeOffering();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Compute Offering", e);
-//        }
+
+        try {
+            // 1. Sync manual sync items
+            this.syncManualImportData();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Manual Import Data", e);
+        }
+        try {
+            // 2. Sync Region entity
+            this.syncRegion("EXECUTE");
+        } catch (Exception e) {
+            Errors errors = new Errors(messageSource);
+            errors.addGlobalError(
+                    "Either of URL or API key or Secret key is wrong. please provide correct values and proceed ");
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            }
+        }
+        try {
+            // 3. Sync Zone entity
+            this.syncZone();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Zone", e);
+        }
+        try {
+            // 4. Sync Domain entity
+            this.syncDomain();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Domaim", e);
+        }
+        try {
+            // 5. Sync Pod entity
+            this.syncPod();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Pod", e);
+        }
+        try {
+            // 6. Sync Cluster entity
+            this.syncCluster();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch cluster", e);
+        }
+        try {
+            // 7. Sync Host entity
+            this.syncHost();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Host", e);
+        }
+        try {
+            // 8. Sync Hypervisor entity
+            this.syncHypervisor();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Hypervisor", e);
+        }
+        try {
+            // 9. Sync Department entity
+            this.syncDepartment();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Department", e);
+        }
+        try {
+            // 10. Sync User entity
+            this.syncUser();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch User", e);
+        }
+        try {
+            // 11. Sync Project entity
+            this.syncProject();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT sync Project", e);
+        }
+        try {
+            // 12. Sync OSCategory entity
+            this.syncOsCategory();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch OS Category", e);
+        }
+        try {
+            // 13. Sync OSType entity.
+            this.syncOsTypes();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch OS Types", e);
+        }
+        try {
+            // 14. Sync physical network entity
+            this.syncPhysicalNetwork();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC offering", e);
+        }
+        try {
+            // 15. Sync network service provider entity
+            this.syncNetworkServiceProvider();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC offering", e);
+        }
+        try {
+            // 16. Sync supported network entity
+            this.syncSupportedNetwork();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC offering", e);
+        }
+        try {
+            // 17. Sync Network offering entity
+            this.syncNetworkOffering();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch NetworkOffering", e);
+        }
+        try {
+            // 18. Sync Compute Offering entity
+            this.syncComputeOffering();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Compute Offering", e);
+        }
         try {
             // 19. Sync Storage offering entity
             this.syncStorageOffering();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Storage Offering", e);
         }
-//        try {
-//            // 20. Sync Iso entity
-//            this.syncIso();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Iso", e);
-//        }
-//        try {
-//            // 21. Sync VPC offering entity
-//            this.syncVpcOffering();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch VPC offering", e);
-//        }
-//        try {
-//            // 22. Sync VPC entity
-//            this.syncVpc();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch VPC", e);
-//        }
-//        try {
-//            // 23. Sync VPC ACL entity
-//            this.syncVpcAcl();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch VPC ACL", e);
-//        }
-//        try {
-//            // 24. Sync Network entity
-//            this.syncNetwork();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Network ", e);
-//        }
-//        try {
-//            // 25. Sync Templates entity
-//            this.syncTemplates();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Templates", e);
-//        }
-//        try {
-//            // 26. Sync SSHKey entity
-//            this.syncSSHKey();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch SSH Key", e);
-//        }
-//        try {
-//            // 27. Sync ResourceLimit entity
-//            this.syncResourceLimit();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
-//        }
-//        try {
-//            // 28. Sync Instance entity
-//            this.syncInstances();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Instance", e);
-//        }
-//        try {
-//            // 29. Sync Volume entity
-//            this.syncVolume();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Volume", e);
-//        }
-//        try {
-//            // 30. Sync VmSnapshot entity
-//            this.syncVmSnapshots();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch vm snapshots", e);
-//        }
-//        try {
-//            // 31. Sync Snapshot entity
-//            this.syncSnapshot();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Snapshot", e);
-//        }
-//        try {
-//            // 32. Sync Nic entity
-//            this.syncNic();
-//            LOGGER.debug("nic");
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Nic", e);
-//        }
-//        try {
-//            // 33. Sync IP address entity
-//            this.syncIpAddress();
-//            LOGGER.debug("ipAddress");
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Ip Address", e);
-//        }
-//        try {
-//            // 34. Sync Egress firewall rules entity
-//            this.syncEgressFirewallRules();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch EgressRule", e);
-//        }
-//        try {
-//            // 35. Sync Ingress firewall rules entity
-//            this.syncIngressFirewallRules();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch EgressRule", e);
-//        }
-//        try {
-//            // 36. Sync Port Forwarding entity
-//            this.syncPortForwarding();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch PortForwarding", e);
-//        }
-//        try {
-//            // 37. Sync SnapshotPolicy entity
-//            this.syncSnapshotPolicy();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch SnapshotPolicy", e);
-//        }
-//        try {
-//            // 38. Sync Load Balancer entity
-//            this.syncLoadBalancer();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch LoadBalancer", e);
-//        }
-//
-//       try {
-//            // 39. Sync Load Balancer entity
-//            this.syncLoadBalancerStickyPolicy();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch LoadBalancer", e);
-//        }
-//        try {
-//            // 40. Sync for update role in user entity
-//            this.syncUpdateUserRole();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT Sync for update role in user entity", e);
-//        }
-//        try {
-//            // 41. Sync VPN user entity
-//            this.syncVpnUser();
-//            LOGGER.debug("ipAddress");
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Ip Address", e);
-//        }
-//        try {
-//            // 42. Sync Load Balancer entity
-//            this.syncEventList();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Event List", e);
-//        }
-//        try {
-//            // 43. Sync affinity group type
-//            this.syncAffinityGroupType();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Affinity group type", e);
-//        }
-//        try {
-//            // 44. Sync affinity group
-//            this.syncAffinityGroup();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Affinity group", e);
-//        }
-//        try {
-//            // 45. Sync VPC ACL entity
-//            this.syncVpcNetworkAcl();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch VPC NETWORK ACL", e);
-//        }
-//        try {
-//            // 46. Sync Secondary storage entity
-//            this.syncSecondaryStorage();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Secondary storage", e);
-//        }
-//        try {
-//            // 47. Sync Primary storage entity
-//            this. syncPrimaryStorage();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch Primary storage", e);
-//        }
-//        try {
-//            // 48. Sync VPN Customer gateway entity
-//            this. syncVPNCustomerGateway();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch VPN customer gateway", e);
-//        }
-//
-//        try {
-//            // 49. Sync general configuration
-//            this.syncGeneralConfiguration();
-//        } catch (Exception e) {
-//            LOGGER.error("ERROR AT synch General Configuration", e);
-//        }
+        try {
+            // 20. Sync Iso entity
+            this.syncIso();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Iso", e);
+        }
+        try {
+            // 21. Sync VPC offering entity
+            this.syncVpcOffering();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC offering", e);
+        }
+        try {
+            // 22. Sync VPC entity
+            this.syncVpc();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC", e);
+        }
+        try {
+            // 23. Sync VPC ACL entity
+            this.syncVpcAcl();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC ACL", e);
+        }
+        try {
+            // 24. Sync Network entity
+            this.syncNetwork();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Network ", e);
+        }
+        try {
+            // 25. Sync Templates entity
+            this.syncTemplates();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Templates", e);
+        }
+        try {
+            // 26. Sync SSHKey entity
+            this.syncSSHKey();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch SSH Key", e);
+        }
+        try {
+            // 27. Sync ResourceLimit entity
+            this.syncResourceLimit();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
+        }
+        try {
+            // 28. Sync Instance entity
+            this.syncInstances();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Instance", e);
+        }
+        try {
+            // 29. Sync Volume entity
+            this.syncVolume();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Volume", e);
+        }
+        try {
+            // 30. Sync VmSnapshot entity
+            this.syncVmSnapshots();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch vm snapshots", e);
+        }
+        try {
+            // 31. Sync Snapshot entity
+            this.syncSnapshot();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Snapshot", e);
+        }
+        try {
+            // 32. Sync Nic entity
+            this.syncNic();
+            LOGGER.debug("nic");
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Nic", e);
+        }
+        try {
+            // 33. Sync IP address entity
+            this.syncIpAddress();
+            LOGGER.debug("ipAddress");
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Ip Address", e);
+        }
+        try {
+            // 34. Sync Egress firewall rules entity
+            this.syncEgressFirewallRules();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch EgressRule", e);
+        }
+        try {
+            // 35. Sync Ingress firewall rules entity
+            this.syncIngressFirewallRules();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch EgressRule", e);
+        }
+        try {
+            // 36. Sync Port Forwarding entity
+            this.syncPortForwarding();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch PortForwarding", e);
+        }
+        try {
+            // 37. Sync SnapshotPolicy entity
+            this.syncSnapshotPolicy();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch SnapshotPolicy", e);
+        }
+        try {
+            // 38. Sync Load Balancer entity
+            this.syncLoadBalancer();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch LoadBalancer", e);
+        }
+
+       try {
+            // 39. Sync Load Balancer entity
+            this.syncLoadBalancerStickyPolicy();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch LoadBalancer", e);
+        }
+        try {
+            // 40. Sync for update role in user entity
+            this.syncUpdateUserRole();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT Sync for update role in user entity", e);
+        }
+        try {
+            // 41. Sync VPN user entity
+            this.syncVpnUser();
+            LOGGER.debug("ipAddress");
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Ip Address", e);
+        }
+        try {
+            // 42. Sync Load Balancer entity
+            this.syncEventList();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Event List", e);
+        }
+        try {
+            // 43. Sync affinity group type
+            this.syncAffinityGroupType();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Affinity group type", e);
+        }
+        try {
+            // 44. Sync affinity group
+            this.syncAffinityGroup();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Affinity group", e);
+        }
+        try {
+            // 45. Sync VPC ACL entity
+            this.syncVpcNetworkAcl();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC NETWORK ACL", e);
+        }
+        try {
+            // 46. Sync Secondary storage entity
+            this.syncSecondaryStorage();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Secondary storage", e);
+        }
+        try {
+            // 47. Sync Primary storage entity
+            this. syncPrimaryStorage();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Primary storage", e);
+        }
+        try {
+            // 48. Sync VPN Customer gateway entity
+            this. syncVPNCustomerGateway();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPN customer gateway", e);
+        }
+
+        try {
+            // 49. Sync general configuration
+            this.syncGeneralConfiguration();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch General Configuration", e);
+        }
 
     }
 
