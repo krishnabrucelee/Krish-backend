@@ -1437,7 +1437,7 @@ public class SyncServiceImpl implements SyncService {
                 computeOffering.setName(csComputeService.getName());
                 computeOffering.setDisplayText(csComputeService.getDisplayText());
                 computeOffering.setStorageTags(csComputeService.getStorageTags());
-                computeOffering.setHostTags(csComputeService.getStorageTags());
+                computeOffering.setHostTags(csComputeService.getHostTags());
                 computeOffering.setDiskBytesReadRate(csComputeService.getDiskBytesReadRate());
                 computeOffering.setDiskBytesWriteRate(csComputeService.getDiskBytesWriteRate());
                 computeOffering.setDiskIopsReadRate(csComputeService.getDiskIopsReadRate());
