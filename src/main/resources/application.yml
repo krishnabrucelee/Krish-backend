@@ -187,3 +187,4 @@ payment:
 background:
     logo:
         dir: ${BACKGROUNG_LOGO_PATH}
+

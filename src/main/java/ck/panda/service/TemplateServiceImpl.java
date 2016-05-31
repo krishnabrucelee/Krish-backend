@@ -624,6 +624,7 @@ public class TemplateServiceImpl implements TemplateService {
         optionalFieldValidation(template, optional,userId);
         optional.put(CloudStackConstants.CS_NAME, template.getName());
         optional.put(CloudStackConstants.CS_DISPLAY_TEXT, template.getDescription());
+        optional.put("ostypeid", osTypeService.find(template.getOsTypeId()).getUuid());
         try {
             if (template.getFormat().equals(Template.Format.ISO)) {
                 cloudStackTemplateService.updateIso(template.getUuid(), CloudStackConstants.JSON, optional);
