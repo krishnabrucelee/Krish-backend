@@ -260,7 +260,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         HashMap<String, String> computeMap = new HashMap<String, String>();
 
          CloudStackOptionalUtil.updateOptionalStringValue(CloudStackConstants.CS_TAGS, compute.getStorageTags(), computeMap);
-         CloudStackOptionalUtil.updateOptionalStringValue(CS_HOST_TAGS, compute.getStorageTags(), computeMap);
+         CloudStackOptionalUtil.updateOptionalStringValue(CS_HOST_TAGS, compute.getHostTags(), computeMap);
          CloudStackOptionalUtil.updateOptionalBooleanValue(CS_CAPACITY, compute.getCpuCapacity(), computeMap);
          CloudStackOptionalUtil.updateOptionalIntegerValue(CS_SPEED, compute.getClockSpeed(), computeMap);
          CloudStackOptionalUtil.updateOptionalIntegerValue(CS_CPU_CORE, compute.getNumberOfCores(), computeMap);
