@@ -166,6 +166,13 @@ public class StorageOffering implements Serializable {
     @Column(name = "min_iops")
     private Long diskMinIops;
 
+    /**
+     * The Provisioning Type of the disk offering.
+     */
+    @Column(name = "provisioning_type")
+    @Enumerated(EnumType.STRING)
+    private ProvisioningType provisioningType;
+
     /** Status attribute to verify status of the Storage offering. */
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
@@ -262,6 +269,32 @@ public class StorageOffering implements Serializable {
         Hypervisor,
         /** Isolated is attached to the hypervisor host where vm is running. */
         Storage
+    }
+
+    /**
+     * Enum type for Provisioning Type. Type used to create volumes. Valid values are thin, sparse, fat..
+     *
+     */
+    public enum ProvisioningType {
+        /** Thin provisioning type. */
+        thin,
+        /** Sparse provisioning type. */
+        sparse,
+        /** Fat provisioning type. */
+        fat
+    }
+
+    /**
+     * Enum type for Cache Mode Type.
+     *
+     */
+    public enum CacheMode {
+        /** None disk cache. */
+        None,
+        /** Write-back disk caching. */
+        writeback,
+        /** Write-through disk caching. */
+        writethrough
     }
 
     /**
@@ -607,6 +640,25 @@ public class StorageOffering implements Serializable {
     }
 
     /**
+     * Get the provisioning type of StorageOffering.
+     *
+     * @return the provisioning type
+     */
+    public ProvisioningType getProvisioningType() {
+        return provisioningType;
+    }
+
+    /**
+     * Set the provisioning type of StorageOffering.
+     *
+     * @param provisioningType the provisioning type to set
+     */
+    public void setProvisioningType(ProvisioningType provisioningType) {
+        this.provisioningType = provisioningType;
+    }
+
+
+    /**
      * Get the status of the storage offering.
      *
      * @return the status of the storage offering
@@ -782,17 +834,17 @@ public class StorageOffering implements Serializable {
             storageOffering.setUuid(JsonUtil.getStringValue(storageMap, CloudStackConstants.CS_ID));
             storageOffering.setName(JsonUtil.getStringValue(storageMap, CloudStackConstants.CS_NAME));
             storageOffering.setDescription(JsonUtil.getStringValue(storageMap, CloudStackConstants.CS_DISPLAY_TEXT));
-            if (storageMap.has(CloudStackConstants.CS_BYTES_READ)) {
-                storageOffering.setDiskBytesReadRate(storageMap.getLong(CloudStackConstants.CS_BYTES_READ));
+            if (storageMap.has(CloudStackConstants.CS_DISK_BYTES_READ)) {
+                storageOffering.setDiskBytesReadRate(storageMap.getLong(CloudStackConstants.CS_DISK_BYTES_READ));
             }
-            if (storageMap.has(CloudStackConstants.CS_BYTES_WRITE)) {
-                storageOffering.setDiskBytesWriteRate(storageMap.getLong(CloudStackConstants.CS_BYTES_WRITE));
+            if (storageMap.has(CloudStackConstants.CS_DISK_BYTES_WRITE)) {
+                storageOffering.setDiskBytesWriteRate(storageMap.getLong(CloudStackConstants.CS_DISK_BYTES_WRITE));
             }
-            if (storageMap.has(CloudStackConstants.CS_IOPS_READ)) {
-                storageOffering.setDiskIopsReadRate(storageMap.getLong(CloudStackConstants.CS_IOPS_READ));
+            if (storageMap.has(CloudStackConstants.CS_DISK_IOPS_READ)) {
+                storageOffering.setDiskIopsReadRate(storageMap.getLong(CloudStackConstants.CS_DISK_IOPS_READ));
             }
-            if (storageMap.has(CloudStackConstants.CS_IOPS_WRITE)) {
-                storageOffering.setDiskIopsWriteRate(storageMap.getLong(CloudStackConstants.CS_IOPS_WRITE));
+            if (storageMap.has(CloudStackConstants.CS_DISK_IOPS_WRITE)) {
+                storageOffering.setDiskIopsWriteRate(storageMap.getLong(CloudStackConstants.CS_DISK_IOPS_WRITE));
             }
             if (storageMap.has(CloudStackConstants.CS_MAX_IOPS)) {
                 storageOffering.setDiskMaxIops(storageMap.getLong(CloudStackConstants.CS_MAX_IOPS));
@@ -805,6 +857,19 @@ public class StorageOffering implements Serializable {
             }
             if (storageMap.has(CloudStackConstants.CS_DOMAIN_ID)) {
                 storageOffering.setTransDomainId(JsonUtil.getStringValue(storageMap, CloudStackConstants.CS_DOMAIN_ID));
+            }
+            if (storageMap.has(CloudStackConstants.CS_TAGS)) {
+                storageOffering.setStorageTags(storageMap.getString(CloudStackConstants.CS_TAGS));
+            }
+            if (storageMap.has(CloudStackConstants.CS_DISK_BYTES_READ) || storageMap.has(CloudStackConstants.CS_DISK_BYTES_WRITE)
+                    || storageMap.has(CloudStackConstants.CS_DISK_IOPS_READ) || storageMap.has(CloudStackConstants.CS_DISK_IOPS_WRITE)) {
+                storageOffering.setQosType(QosType.Hypervisor);
+            }
+            if (storageMap.has(CloudStackConstants.CS_MAX_IOPS) || storageMap.has(CloudStackConstants.CS_MIN_IOPS) || storageMap.has(CloudStackConstants.CS_CUSTOM_IOPS_STATUS)) {
+                storageOffering.setQosType(QosType.Storage);
+            }
+            if (storageMap.has(CloudStackConstants.CS_PROVISIONING_TYPE)) {
+                storageOffering.setProvisioningType(storageOffering.getProvisioningType().valueOf(JsonValidator.jsonStringValidation(storageMap, CloudStackConstants.CS_PROVISIONING_TYPE)));
             }
             storageOffering.setDiskSize(storageMap.getLong(CloudStackConstants.CS_DISK_SIZE));
             storageOffering.setIsCustomDisk(storageMap.getBoolean(CloudStackConstants.CS_CUSTOM_STATUS));
