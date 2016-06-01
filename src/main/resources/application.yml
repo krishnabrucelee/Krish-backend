@@ -8,7 +8,8 @@ spring:
         testWhileIdle: true
         timeBetweenEvictionRunsMillis: 3625000
         validationQuery: SELECT 1
-
+    freemarker:
+        check-template-location: ${CHECK_TEMPLATE_LOCATION:false}
 
     jpa:
         hibernate.ddl-auto: validate
@@ -29,34 +30,34 @@ spring:
 
     # RabbitMQ Properties
     rabbit:
-        host: ${RABBITMQ_HOST}
+        host: ${RABBITMQ_HOST:192.168.1.159}
         vhost: /
-        username: ${RABBITMQ_USERNAME}
-        password: ${RABBITMQ_PASSWORD}
+        username: ${RABBITMQ_USERNAME:panda}
+        password: ${RABBITMQ_PASSWORD:l3tm3in}
         exchange:
-            name: ${RABBITMQ_EXCHANGE}
+            name: ${RABBITMQ_EXCHANGE:cloudstack-events}
         email:
-            name: ${RABBITMQ_EMAIL_EXCHANGE}
+            name: ${RABBITMQ_EMAIL_EXCHANGE:Exchange}
     # CS server Routing key
         server:
             action:
                 pattern: "*.ActionEvent.*.*.*"
-                queue: ${RABBITMQ_ACTION_EVENT}
+                queue: ${RABBITMQ_ACTION_EVENT:ActionEvent}
             alert:
                 pattern: "*.AlertEvent.*.*.*"
-                queue: ${RABBITMQ_ALERT_EVENT}
+                queue: ${RABBITMQ_ALERT_EVENT:CSAlertEvent}
             usage:
                 pattern: "*.UsageEvent.*.*.*"
-                queue: ${RABBITMQ_CS_USAGE_EVENT}
+                queue: ${RABBITMQ_CS_USAGE_EVENT:CSUsageEvent}
             asynchJob:
                 pattern: "*.AsyncJobEvent.*.*.*"
-                queue: ${RABBITMQ_CS_ASYNC_EVENT}
+                queue: ${RABBITMQ_CS_ASYNC_EVENT:CSAsynchEvent}
             resource:
                 pattern: "*.ResourceStateEvent.*.*.*"
-                queue: ${RABBITMQ_RESOURCE_EVENT}
+                queue: ${RABBITMQ_RESOURCE_EVENT:CSResourceEvent}
             email:
                 pattern: "email.template"
-                queue : ${RABBITMQ_EMAIL}
+                queue : ${RABBITMQ_EMAIL:Email}
  # Mail configuration
     mail:
         host: mail.xxx.com
@@ -87,7 +88,7 @@ cloudstack:
 console:
     proxy: ${CONSOLE_URL}
 mrping:
-    url: ${MRPING_URL}
+    url: ${MRPING_URL:http://localhost:8086/api}
 
 ---
 
@@ -105,6 +106,13 @@ logging:
 server:
     port: ${PANDA_PORT:8080}
     session-timeout: 60
+    ssl:
+        key-store: ${KEY_STORE}
+        key-store-password: ${KEY_STORE_PASSWORD}
+        key-password: ${KEY_PASSWORD}
+        enabled: ${KEY_ENABLED}
+        key-alias: ${KEY_ALIAS}
+        protocol: ${KEY_PROTOCOL}
 
 ---
 
@@ -133,8 +141,8 @@ keystore:
 backend:
     admin:
         userid: 1
-        username: ${BACKEND_ADMIN_USERNAME}
-        password: ${BACKEND_ADMIN_PASSWORD}
+        username: ${BACKEND_ADMIN_USERNAME:admin}
+        password: ${BACKEND_ADMIN_PASSWORD:password}
         role: BACKEND_ADMIN
         dominid: 1
         departmentid: 1000
@@ -170,13 +178,13 @@ login:
 
 english:
     template:
-        dir: ${ENGLISH_TEMPLATE_DIR}
+        dir: ${ENGLISH_TEMPLATE_DIR:/home/english}
 chinese:
     template:
-        dir: ${CHINESE_TEMPLATE_DIR}
+        dir: ${CHINESE_TEMPLATE_DIR:/home/chinese}
 invoice:
     base:
-        path: ${INVOICE_ATTACHMENT_DIR:/home/Assistanz/invoice/invoiceattachment}
+        path: ${INVOICE_ATTACHMENT_DIR:/home/intern/Softwares/invoiceItems}
 
 ---
 payment:
@@ -186,5 +194,4 @@ payment:
 ---
 background:
     logo:
-        dir: ${BACKGROUNG_LOGO_PATH}
-
+        dir: ${BACKGROUNG_LOGO_PATH:/home/english}
