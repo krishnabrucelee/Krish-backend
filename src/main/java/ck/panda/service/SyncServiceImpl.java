@@ -2518,9 +2518,9 @@ public class SyncServiceImpl implements SyncService {
                 if (csProject.getDepartmentId() != project.getDepartmentId()) {
                     project.setDepartmentId(csProject.getDepartmentId());
                     // if department updated for project reset project owner.
-                    project.setProjectOwnerId(null);
-                    project.setProjectOwner(null);
-                    project.setUserList(null);
+//                    project.setProjectOwnerId(null);
+//                    project.setProjectOwner(null);
+//                    project.setUserList(null);
                 }
                 project.setStatus(csProject.getStatus());
                 project.setDescription(csProject.getDescription());
