@@ -5,6 +5,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
@@ -14,6 +20,9 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,6 +32,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class PingServer {
+
+    /** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(PingServer.class);
+
+     @Value(value = "${server.ssl.enabled}")
+     public Boolean sslEnabled;
 
     /** URL that connects with MR.ping. */
     private String apiURL;
@@ -74,6 +89,9 @@ public class PingServer {
      */
     public String requestWithMethod(LinkedList<NameValuePair> queryValues, HttpMethod method) throws Exception {
         try {
+            if(!sslEnabled) {
+                disableSSL();
+            }
             method.setFollowRedirects(true);
             method.setQueryString(queryValues.toArray(new NameValuePair[0]));
         } catch (Exception e) {
@@ -94,6 +112,9 @@ public class PingServer {
     public String postRequest(String queryValues) throws Exception {
         PostMethod method = null;
         try {
+            if(!sslEnabled) {
+                disableSSL();
+            }
             method = new PostMethod(apiURL);
             method.setRequestHeader("Accept", "application/json");
             method.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
@@ -120,6 +141,9 @@ public class PingServer {
     public String putRequest(String queryValues) throws Exception {
         PutMethod method = null;
         try {
+            if(!sslEnabled) {
+                disableSSL();
+            }
             method = new PutMethod(apiURL);
             method.setRequestHeader("Accept", "application/json");
             method.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
@@ -183,4 +207,35 @@ public class PingServer {
         return "";
     }
 
+    /**
+     * DisableSSL.
+     */
+    private void disableSSL() {
+        try {
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                new X509TrustManager() {
+                    public java.security.cert.
+                        X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+                    public void checkClientTrusted(
+                            final java.security.cert.X509Certificate[] certs,
+                            final String authType) {
+                        }
+                    public void checkServerTrusted(
+                            final java.security.cert.X509Certificate[] certs,
+                            final String authType) {
+                    }
+                }
+            };
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+
+            HttpsURLConnection.setDefaultSSLSocketFactory(
+                    sc.getSocketFactory());
+
+        } catch (Exception ex) {
+            LOGGER.debug("Unable to disable ssl verification" + ex);
+        }
+    }
 }
