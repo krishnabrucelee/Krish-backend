@@ -9,11 +9,19 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import ck.panda.service.ThemeSettingService;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 /**
  * SimpleCORSFilter to allow cross domain call.
@@ -38,6 +46,12 @@ public class SimpleCORSFilter implements Filter {
     /** Constant for HOME. */
     public static final String HOME = "home";
 
+    /** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleCORSFilter.class);
+
+    @Value(value = "${server.ssl.enabled}")
+    public Boolean sslEnabled;
+
     /**
      * Overriden method.
      */
@@ -46,6 +60,11 @@ public class SimpleCORSFilter implements Filter {
             throws IOException, ServletException {
         HttpServletResponse response = (HttpServletResponse) res;
         HttpServletRequest request = (HttpServletRequest) req;
+
+        if(!sslEnabled) {
+            disableSSL();
+        }
+
         System.out.println("IN");
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
@@ -67,6 +86,38 @@ public class SimpleCORSFilter implements Filter {
             chain.doFilter(req, res);
         }
 
+    }
+
+    /**
+     * DisableSSL.
+     */
+    private void disableSSL() {
+        try {
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                new X509TrustManager() {
+                    public java.security.cert.
+                        X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+                    public void checkClientTrusted(
+                            final java.security.cert.X509Certificate[] certs,
+                            final String authType) {
+                        }
+                    public void checkServerTrusted(
+                            final java.security.cert.X509Certificate[] certs,
+                            final String authType) {
+                    }
+                }
+            };
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+
+            HttpsURLConnection.setDefaultSSLSocketFactory(
+                    sc.getSocketFactory());
+
+        } catch (Exception ex) {
+            LOGGER.debug("Unable to disable ssl verification" + ex);
+        }
     }
 
     /**
