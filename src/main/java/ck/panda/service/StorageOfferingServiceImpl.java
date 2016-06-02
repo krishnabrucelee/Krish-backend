@@ -203,8 +203,10 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
                 storage.getDiskMinIops(), stoarageMap);
         CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_MAX_IOPS,
                 storage.getDiskMaxIops(), stoarageMap);
-        CloudStackOptionalUtil.updateOptionalStringValue(CloudStackConstants.CS_PROVISIONING_TYPE,
-                storage.getProvisioningType().toString(), stoarageMap);
+        if (storage.getProvisioningType() != null) {
+            CloudStackOptionalUtil.updateOptionalStringValue(CloudStackConstants.CS_PROVISIONING_TYPE,
+                    storage.getProvisioningType().toString(), stoarageMap);
+        }
         if (storage.getDomainId() != null) {
             CloudStackOptionalUtil.updateOptionalStringValue(CloudStackConstants.CS_DOMAIN_ID,
                     convertEntityService.getDomainById(storage.getDomainId()).getUuid(), stoarageMap);
