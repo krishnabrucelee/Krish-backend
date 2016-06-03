@@ -1,10 +1,14 @@
 package ck.panda;
 
 import java.util.Locale;
+
+import org.apache.coyote.AbstractProtocol;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
+import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -143,6 +147,13 @@ public class ApplicationConfig extends WebMvcConfigurerAdapter {
         LocaleChangeInterceptor lci = new LocaleChangeInterceptor();
         lci.setParamName("lang");
         return lci;
+    }
+
+    @Bean
+    public EmbeddedServletContainerFactory servletContainerFactory() {
+        TomcatEmbeddedServletContainerFactory factory = new TomcatEmbeddedServletContainerFactory();
+        factory.addConnectorCustomizers(connector -> ((AbstractProtocol) connector.getProtocolHandler()).setConnectionTimeout(-1));
+        return factory;
     }
 
     @Override
