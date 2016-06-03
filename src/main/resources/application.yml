@@ -110,9 +110,16 @@ server:
         key-store: ${KEY_STORE}
         key-store-password: ${KEY_STORE_PASSWORD}
         key-password: ${KEY_PASSWORD}
-        enabled: ${KEY_ENABLED}
+        enabled: ${KEY_ENABLED:false}
         key-alias: ${KEY_ALIAS}
         protocol: ${KEY_PROTOCOL}
+    tomcat:
+        accesslog:
+            directory: ${ACCESS_LOG_DIRECTORY}
+            enabled: ${ACCESS_LOG_ENABLED}
+            pattern: ${ACCESS_LOG_PATTERN}
+            prefix: ${ACCESS_LOG_PREFIX}
+            suffix: ${ACCESS_LOG_SUFFIX}
 
 ---
 
