@@ -309,8 +309,11 @@ public class TemplateServiceImpl implements TemplateService {
                 template.setTemplateOwnerId(convertEntityService.getUserByName(template.getTransCreatedName(),
                     convertEntityService.getDomain(template.getTransDomain())));
                 template.setDomainId(convertEntityService.getDomainId(template.getTransDomain()));
+                if((convertEntityService.getDepartmentByUsernameAndDomains(
+                        template.getTransDepartment(), convertEntityService.getDomain(template.getTransDomain())) != null)) {
                 template.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
                         template.getTransDepartment(), convertEntityService.getDomain(template.getTransDomain())));
+                }
                 templateList.add(template);
             }
         }
