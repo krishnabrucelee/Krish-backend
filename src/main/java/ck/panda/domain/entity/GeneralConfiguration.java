@@ -164,19 +164,19 @@ public class GeneralConfiguration implements Serializable {
      * @return the defaultLanguage
      */
     public String getDefaultLanguage() {
-		return defaultLanguage;
-	}
+        return defaultLanguage;
+    }
 
     /**
      * Set the default language.
      *
      * @param defaultLanguage the defaultLanguage to set
      */
-	public void setDefaultLanguage(String defaultLanguage) {
-		this.defaultLanguage = defaultLanguage;
-	}
+    public void setDefaultLanguage(String defaultLanguage) {
+        this.defaultLanguage = defaultLanguage;
+    }
 
-	/**
+    /**
      * Get the createdDatetime.
      *
      * @return the createdDateTime
