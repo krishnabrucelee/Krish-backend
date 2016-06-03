@@ -780,7 +780,4 @@ public class CloudStackConstants {
     /** Constant for provisioning type. */
     public static final String CS_PROVISIONING_TYPE = "provisioningtype";
 
-    /** Constant for default language. */
-    public static final String CS_DEFAULT_LANGUAGE = "Chinese";
-
 }
