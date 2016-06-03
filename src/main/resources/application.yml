@@ -113,6 +113,13 @@ server:
         enabled: ${KEY_ENABLED}
         key-alias: ${KEY_ALIAS}
         protocol: ${KEY_PROTOCOL}
+    tomcat:
+        accesslog:
+            directory: ${ACCESS_LOG_DIRECTORY}
+            enabled: ${ACCESS_LOG_ENABLED}
+            pattern: ${ACCESS_LOG_PATTERN}
+            prefix: ${ACCESS_LOG_PREFIX}
+            suffix: ${ACCESS_LOG_SUFFIX}
 
 ---
 
