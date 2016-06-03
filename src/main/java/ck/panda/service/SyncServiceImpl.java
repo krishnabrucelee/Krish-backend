@@ -3273,6 +3273,7 @@ public class SyncServiceImpl implements SyncService {
             generalConfiguration.setRememberMeExpiredDays(30);
             generalConfiguration.setSessionTime(14400);
             generalConfiguration.setIsActive(true);
+            generalConfiguration.setDefaultLanguage(CloudStackConstants.CS_DEFAULT_LANGUAGE);
             generalConfigurationService.save(generalConfiguration);
         }
 
