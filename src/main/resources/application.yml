@@ -107,12 +107,12 @@ server:
     port: ${PANDA_PORT:8080}
     session-timeout: 60
     ssl:
-        key-store: ${KEY_STORE}
-        key-store-password: ${KEY_STORE_PASSWORD}
-        key-password: ${KEY_PASSWORD}
-        enabled: ${KEY_ENABLED}
-        key-alias: ${KEY_ALIAS}
-        protocol: ${KEY_PROTOCOL}
+        key-store: ${KEY_STORE:false}
+        key-store-password: ${KEY_STORE_PASSWORD:false}
+        key-password: ${KEY_PASSWORD:false}
+        enabled: ${KEY_ENABLED:false}
+        key-alias: ${KEY_ALIAS:false}
+        protocol: ${KEY_PROTOCOL:false}
 
 ---
 
