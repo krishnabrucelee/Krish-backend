@@ -965,12 +965,15 @@ public class ConvertEntityService {
      *             unhandled exception.
      */
     public Long getDepartmentByUsernameAndDomains(String name, Domain domain) throws Exception {
+        if(domain != null) {
         Department department = departmentService.findByUsernameDomainAndIsActive(name, domain.getId(), true);
         if (department != null) {
             return department.getId();
         } else {
             return null;
         }
+    }
+        return null;
     }
 
     /**
