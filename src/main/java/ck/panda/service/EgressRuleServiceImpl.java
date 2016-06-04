@@ -10,11 +10,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.FirewallRules.TrafficType;
 import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.IpAddress.State;
+import ck.panda.domain.entity.Network.NetworkCreationType;
 import ck.panda.domain.entity.Network;
+import ck.panda.domain.entity.Project;
 import ck.panda.domain.repository.jpa.EgressRuleRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackFirewallService;
@@ -66,6 +70,9 @@ public class EgressRuleServiceImpl implements EgressRuleService {
      */
     @Autowired
     private CloudStackFirewallService csEgressService;
+
+    @Autowired
+    private ProjectService projectService;
 
     @Override
     public FirewallRules save(FirewallRules egressFirewallRule) throws Exception {
@@ -232,16 +239,34 @@ public class EgressRuleServiceImpl implements EgressRuleService {
 
     @Override
     public List<FirewallRules> findAllFromCSServerForIngress() throws Exception {
-        List<IpAddress> ipList = ipaddressService.findByStateAndActive(State.ALLOCATED, true);
+        List<Project> projectList = projectService.findAllByActive(true);
         List<FirewallRules> ingressList = new ArrayList<FirewallRules>();
+        for (Project project: projectList) {
+            HashMap<String, String> networkMap = new HashMap<String, String>();
+            networkMap.put(CloudStackConstants.CS_PROJECT_ID, project.getUuid());
+            ingressList = getFirewallList(networkMap, ingressList);
+        }
+
+        HashMap<String, String> networkMap = new HashMap<String, String>();
+        networkMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+        ingressList = getFirewallList(networkMap, ingressList);
+        return ingressList;
+        }
+
+    /**
+     * Get Network List for Sync.
+     *
+     * @param networkMap hashMap of the network
+     * @param networkList list of network
+     * @return return network
+     * @throws Exception unHandled Exceptions
+     */
+    private List<FirewallRules> getFirewallList(HashMap<String, String> networkMap, List<FirewallRules> ingressList) throws Exception {
+        List<IpAddress> ipList = ipaddressService.findByStateAndActive(State.ALLOCATED, true);
         LOGGER.debug("Ip size" + ipList.size());
-        for (IpAddress net : ipList) {
-            HashMap<String, String> ingressMap = new HashMap<String, String>();
-            ingressMap.put("ipaddressid", net.getUuid());
-            ingressMap.put("listall", "true");
-            configServer.setServer(1L);
+           configServer.setServer(1L);
             // 1. Get the list of firewalls from CS server using CS connector
-            String response = csEgressService.listFirewallRules("json", ingressMap);
+            String response = csEgressService.listFirewallRules("json", networkMap);
             JSONObject listJSON = new JSONObject(response).getJSONObject("listfirewallrulesresponse");
             if (response != null && listJSON.has("firewallrule")) {
                 JSONArray ingressListJSON = listJSON.getJSONArray("firewallrule");
@@ -263,10 +288,12 @@ public class EgressRuleServiceImpl implements EgressRuleService {
                             .getDomainId());
                     ingressList.add(ingress);
                 }
-            }
+
+
         }
         return ingressList;
     }
+
 
     @Override
     public List<FirewallRules> findAllByTrafficType(TrafficType trafficType) throws Exception {
