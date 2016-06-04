@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
+import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.PortForwarding;
+import ck.panda.domain.entity.Project;
 import ck.panda.domain.repository.jpa.PortForwardingRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackFirewallService;
@@ -49,6 +51,9 @@ public class PortForwardingServiceImpl implements PortForwardingService {
     /** Cloud stack configuration reference. */
     @Autowired
     private ConfigUtil configUtil;
+
+    @Autowired
+    private ProjectService projectService;
 
     @Override
     public PortForwarding save(PortForwarding portForwarding) throws Exception {
@@ -103,9 +108,21 @@ public class PortForwardingServiceImpl implements PortForwardingService {
 
     @Override
     public List<PortForwarding> findAllFromCSServer() throws Exception {
-        List<PortForwarding> portForwardingList = new ArrayList<PortForwarding>();
+        List<Project> projectList = projectService.findAllByActive(true);
+        List<PortForwarding> portList = new ArrayList<PortForwarding>();
+        for (Project project: projectList) {
+            HashMap<String, String> portForwardingMap = new HashMap<String, String>();
+            portForwardingMap.put(CloudStackConstants.CS_PROJECT_ID, project.getUuid());
+            portList = getPortList(portForwardingMap, portList);
+        }
+
         HashMap<String, String> portForwardingMap = new HashMap<String, String>();
-        portForwardingMap.put("listall", "true");
+        portForwardingMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+        portList = getPortList(portForwardingMap, portList);
+        return portList;
+        }
+
+    private List<PortForwarding> getPortList(HashMap<String, String> portForwardingMap, List<PortForwarding> portList) throws Exception {
         String response = cloudStackFirewallService.listPortForwardingRules(portForwardingMap, "json");
         JSONArray portForwardingListJSON = null;
         JSONObject responseObject = new JSONObject(response).getJSONObject("listportforwardingrulesresponse");
@@ -116,10 +133,10 @@ public class PortForwardingServiceImpl implements PortForwardingService {
                 portForwarding.setVmInstanceId(convertEntityService.getVmInstanceId(portForwarding.getTransvmInstanceId()));
                 portForwarding.setNetworkId(convertEntityService.getNetworkId(portForwarding.getTransNetworkId()));
                 portForwarding.setIpAddressId(convertEntityService.getIpAddressId(portForwarding.getTransIpAddressId()));
-                portForwardingList.add(portForwarding);
+                portList.add(portForwarding);
             }
         }
-        return portForwardingList;
+        return portList;
     }
 
     @Override

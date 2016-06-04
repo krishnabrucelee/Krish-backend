@@ -174,16 +174,6 @@ public class WebsocketServiceImpl implements WebsocketService {
                 if (event.getMessage() != null && (event.getStatus().equals(Event.Status.FAILED)
                         || event.getStatus().equals(Event.Status.ERROR))) {
 
-                    // For Error status update
-                    VmInstance vmInstance = virtualMachineService.findByUUID(event.getResourceUuid());
-                    if (vmInstance != null) {
-                        vmInstance.setStatus(
-                                VmInstance.Status.valueOf(event.getMessage().toUpperCase()));
-                        vmInstance.setSyncFlag(false);
-                        virtualMachineService.update(vmInstance);
-                    }
-
-
                     String message = eventmapper.writeValueAsString(event);
                     if (event.getStatus().equals(Event.Status.FAILED) && (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).startsWith(EventTypes.EVENT_VM_SNAPSHOT))) {
                         if (eventObject.has(CloudStackConstants.CS_CMD_INFO)) {
