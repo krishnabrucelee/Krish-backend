@@ -78,6 +78,9 @@ public class ThemeSettingController extends CRUDController<ThemeSetting> impleme
             @RequestParam(value="headers") String headers,
             @RequestParam(value = "footers") String footers,
             @RequestParam(value="welcomeContent") String welcomeContent,
+            @RequestParam(value="welcomeContentUser") String welcomeContentUser,
+            @RequestParam(value="splashTitle") String splashTitle,
+            @RequestParam(value="splashTitleUser") String splashTitleUser,
             @RequestParam(value = "footerContent") String footerContent)
                     throws Exception {
         InputStream inputStream = null;
@@ -161,6 +164,17 @@ public class ThemeSettingController extends CRUDController<ThemeSetting> impleme
         }
         if (welcomeContent != null) {
             theme.setWelcomeContent(welcomeContent);
+        }
+        if (welcomeContentUser != null) {
+            theme.setWelcomeContentUser(welcomeContentUser);
+        }
+        if(splashTitle != null)
+        {
+            theme.setSplashTitle(splashTitle);
+        }
+        if(splashTitleUser != null)
+        {
+            theme.setSplashTitleUser(splashTitleUser);
         }
         if (footerContent != null) {
             theme.setFooterContent(footerContent);
