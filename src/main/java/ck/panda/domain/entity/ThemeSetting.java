@@ -59,11 +59,23 @@ public class ThemeSetting implements Serializable {
     @OneToMany(cascade = CascadeType.ALL)
     private List<ThemeCustomisation> footers;
 
-    /** Welcome Text for login page. */
+    /** Splash Title Text for Admin login page. */
+    @Column(name = "splash_title", columnDefinition = "TEXT")
+    private String splashTitle;
+
+    /** Splash Title Text for User login page. */
+    @Column(name = "splash_title_user", columnDefinition = "TEXT")
+    private String splashTitleUser;
+
+    /** Welcome Text for Admin login page. */
     @Column(name = "welcome_content", columnDefinition = "TEXT")
     private String welcomeContent;
 
-    /** Welcome Text for login page. */
+    /** Welcome Text for User login page. */
+    @Column(name = "welcome_content_user", columnDefinition = "TEXT")
+    private String welcomeContentUser;
+
+    /** Footer Text for login page. */
     @Column(name = "footer_content", columnDefinition = "TEXT")
     private String footerContent;
 
@@ -242,6 +254,61 @@ public class ThemeSetting implements Serializable {
      */
     public void setWelcomeContent(String welcomeContent) {
         this.welcomeContent = welcomeContent;
+    }
+
+
+    /**
+     * Get the welcomeContent of User Panel for ThemeSetting.
+     *
+     * @return the welcomeContentUser
+     */
+    public String getWelcomeContentUser() {
+        return welcomeContentUser;
+    }
+
+    /**
+     * Set the welcomeContent of User Panel for ThemeSetting.
+     *
+     * @param welcomeContentUser the welcomeContentUser to set
+     */
+    public void setWelcomeContentUser(String welcomeContentUser) {
+        this.welcomeContentUser = welcomeContentUser;
+    }
+
+    /**
+     * Get the splashTitle of Admin Panel for ThemeSetting.
+     *
+     * @return the splashTitle
+     */
+    public String getSplashTitle() {
+        return splashTitle;
+    }
+
+    /**
+     * Set the splashTitle of Admin Panel for ThemeSetting.
+     *
+     * @param splashTitle the splashTitle to set
+     */
+    public void setSplashTitle(String splashTitle) {
+        this.splashTitle = splashTitle;
+    }
+
+    /**
+     * Get the splashTitle of User Panel for ThemeSetting.
+     *
+     * @return the splashTitleUser
+     */
+    public String getSplashTitleUser() {
+        return splashTitleUser;
+    }
+
+    /**
+     * Get the splashTitle of User Panel for ThemeSetting.
+     *
+     * @param splashTitleUser the splashTitleUser to set
+     */
+    public void setSplashTitleUser(String splashTitleUser) {
+        this.splashTitleUser = splashTitleUser;
     }
 
     /**
