@@ -8,9 +8,10 @@ spring:
         testWhileIdle: true
         timeBetweenEvictionRunsMillis: 3625000
         validationQuery: SELECT 1
-    freemarker:
-        check-template-location: ${CHECK_TEMPLATE_LOCATION:false}
-
+    velocity:
+       resource-loader-path: ${RESOURCE_LOADER_PATH:file:/home/assistanz/reports/chinesetemplate}
+       prefer-file-system-access: ${PREFER_FILE_SYSTEM_ACCESS:true}
+       check-template-location: ${CHECK_TEMPLATE_LOCATION:false}
     jpa:
         hibernate.ddl-auto: validate
 
@@ -107,12 +108,19 @@ server:
     port: ${PANDA_PORT:8080}
     session-timeout: 60
     ssl:
-        key-store: ${KEY_STORE:false}
-        key-store-password: ${KEY_STORE_PASSWORD:false}
-        key-password: ${KEY_PASSWORD:false}
+        key-store: ${KEY_STORE}
+        key-store-password: ${KEY_STORE_PASSWORD}
+        key-password: ${KEY_PASSWORD}
         enabled: ${KEY_ENABLED:false}
-        key-alias: ${KEY_ALIAS:false}
-        protocol: ${KEY_PROTOCOL:false}
+        key-alias: ${KEY_ALIAS}
+        protocol: ${KEY_PROTOCOL}
+    tomcat:
+        accesslog:
+            directory: ${ACCESS_LOG_DIRECTORY}
+            enabled: ${ACCESS_LOG_ENABLED}
+            pattern: ${ACCESS_LOG_PATTERN}
+            prefix: ${ACCESS_LOG_PREFIX}
+            suffix: ${ACCESS_LOG_SUFFIX}
 
 ---
 
@@ -185,7 +193,6 @@ chinese:
 invoice:
     base:
         path: ${INVOICE_ATTACHMENT_DIR:/home/intern/Softwares/invoiceItems}
-
 ---
 payment:
     return:

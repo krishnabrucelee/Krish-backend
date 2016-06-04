@@ -46,6 +46,10 @@ public class GeneralConfiguration implements Serializable {
     @Column(name = "session_time")
     private Integer sessionTime;
 
+    /** Default language. */
+    @Column(name = "default_language")
+    private String defaultLanguage;
+
     /** Created date and time. */
     @CreatedDate
     @Column(name = "created_date_time")
@@ -152,6 +156,24 @@ public class GeneralConfiguration implements Serializable {
      */
     public void setSessionTime(Integer sessionTime) {
         this.sessionTime = sessionTime;
+    }
+
+    /**
+     * Get the default language.
+     *
+     * @return the defaultLanguage
+     */
+    public String getDefaultLanguage() {
+        return defaultLanguage;
+    }
+
+    /**
+     * Set the default language.
+     *
+     * @param defaultLanguage the defaultLanguage to set
+     */
+    public void setDefaultLanguage(String defaultLanguage) {
+        this.defaultLanguage = defaultLanguage;
     }
 
     /**

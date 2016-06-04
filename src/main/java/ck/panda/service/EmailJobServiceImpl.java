@@ -9,7 +9,6 @@ import java.util.Map;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.mail.MessagingException;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.amqp.core.MessageBuilder;
@@ -139,54 +138,75 @@ public class EmailJobServiceImpl implements EmailJobService {
     @Override
     public void sendEmail(String eventObject) throws Exception {
         EmailConfiguration emailConfiguration = emailServiceConfig.findByIsActive(true);
-        // Event record from email listener call.
-        ObjectMapper eventmapper = new ObjectMapper();
-        eventResponse = eventmapper.readValue(eventObject, EmailEvent.class);
-        Email mimeEmail = new Email();
-        EmailTemplate templateName = new EmailTemplate();
-        Domain domain = domainService.findbyUUID(eventResponse.getDomainId());
-        if (eventResponse.getEventType().equals(EventTypes.EVENT_USAGE_UPDATE_FAILED)) {
-            User user = null;
-            eventResponse.setEvent(eventResponse.getEventType());
-            mimeEmail.setFrom(emailConfiguration.getEmailFrom());
-            mimeEmail.setTo(domain.getEmail());
-            mimeEmail.setBody(generateCountContent(eventResponse, user, domain, emailConfiguration, templateName, mimeEmail, eventPaymentResponse));
-            emailService.sendMail(mimeEmail);
-        }
-        if (eventResponse.getEventType().equals(EventTypes.EVENT_MONTHLY_INVOICE)) {
-            User user = null;
-            String usageResponse = pingService.getInvoiceById(eventResponse.getInvoiceId());
-            eventResponse.setEvent(eventResponse.getEventType());
-            mimeEmail.setInvoice(usageResponse);
-            mimeEmail.setBody(generateCountContent(eventResponse, user, domain, emailConfiguration, templateName, mimeEmail, eventPaymentResponse));
-            emailService.sendMail(mimeEmail);
-        }
-        if (eventResponse.getEventType().equals(EmailConstants.EMAIL_PAYMENT)) {
-            User user = null;
-            eventPaymentResponse = eventmapper.readValue(eventObject, EmailPayment.class);
-            eventResponse.setEvent(eventPaymentResponse.getEventType());
-            mimeEmail.setFrom(eventPaymentResponse.getOrganisationEmail());
-            mimeEmail.setTo(eventPaymentResponse.getCompanyEmail());
-            mimeEmail.setBody(generateCountContent(eventResponse, user, domain, emailConfiguration, templateName, mimeEmail, eventPaymentResponse));
-            emailService.sendMail(mimeEmail);
-        }
-        if (eventResponse.getEventType().equals(EmailConstants.EMAIL_CAPACITY)
-                || eventResponse.getEventType().equals(EmailConstants.SYSTEM_ERROR)) {
-            User user = null;
-            Organization orgnizationDetails = organizationService.findByIsActive(true);
-            mimeEmail.setFrom(emailConfiguration.getEmailFrom());
-            mimeEmail.setTo(orgnizationDetails.getEmail());
-            mimeEmail.setBody(generateCountContent(eventResponse, user, domain, emailConfiguration, templateName, mimeEmail, eventPaymentResponse));
-            emailService.sendMail(mimeEmail);
-        }
-        if (eventResponse.getEvent() != null && eventResponse.getEvent().equals(EventTypes.EVENT_USER_CREATE)
-                || eventResponse.getEvent().equals(EventTypes.EVENT_USER_DELETE)
-                || eventResponse.getEvent().equals(EventTypes.EVENT_USER_UPDATE)) {
-            User user = userService.find(Long.parseLong(eventResponse.getUser()));
-            mimeEmail.setFrom(emailConfiguration.getEmailFrom());
-            mimeEmail.setTo(user.getEmail());
-            mimeEmail.setBody(generateCountContent(eventResponse, user, domain, emailConfiguration, templateName, mimeEmail, eventPaymentResponse));
-            emailService.sendMail(mimeEmail);
+        if (emailConfiguration != null) {
+            // Event record from email listener call.
+            ObjectMapper eventmapper = new ObjectMapper();
+            eventResponse = eventmapper.readValue(eventObject, EmailEvent.class);
+            Email mimeEmail = new Email();
+            EmailTemplate templateName = new EmailTemplate();
+            Domain domain = domainService.findbyUUID(eventResponse.getDomainId());
+            if (eventResponse.getEventType().equals(EventTypes.EVENT_USAGE_UPDATE_FAILED)) {
+                User user = null;
+                if (domain != null) {
+                    eventResponse.setEvent(eventResponse.getEventType());
+                    mimeEmail.setFrom(emailConfiguration.getEmailFrom());
+                    mimeEmail.setTo(domain.getEmail());
+                    mimeEmail.setBody(generateCountContent(eventResponse, user, domain, emailConfiguration,
+                            templateName, mimeEmail, eventPaymentResponse));
+                    if (mimeEmail.getBody() != null) {
+                        emailService.sendMail(mimeEmail);
+                    }
+                }
+            }
+            if (eventResponse.getEventType().equals(EventTypes.EVENT_MONTHLY_INVOICE)) {
+                User user = null;
+                String usageResponse = pingService.getInvoiceById(eventResponse.getInvoiceId());
+                eventResponse.setEvent(eventResponse.getEventType());
+                mimeEmail.setInvoice(usageResponse);
+                mimeEmail.setBody(generateCountContent(eventResponse, user, domain, emailConfiguration, templateName,
+                        mimeEmail, eventPaymentResponse));
+                if (mimeEmail.getBody() != null) {
+                    emailService.sendMail(mimeEmail);
+                }
+            }
+            if (eventResponse.getEventType().equals(EmailConstants.EMAIL_PAYMENT)) {
+                User user = null;
+                eventPaymentResponse = eventmapper.readValue(eventObject, EmailPayment.class);
+                eventResponse.setEvent(eventPaymentResponse.getEventType());
+                mimeEmail.setFrom(eventPaymentResponse.getOrganisationEmail());
+                mimeEmail.setTo(eventPaymentResponse.getCompanyEmail());
+                mimeEmail.setBody(generateCountContent(eventResponse, user, domain, emailConfiguration, templateName,
+                        mimeEmail, eventPaymentResponse));
+                if (mimeEmail.getBody() != null) {
+                    emailService.sendMail(mimeEmail);
+                }
+            }
+            if (eventResponse.getEventType().equals(EmailConstants.EMAIL_CAPACITY)
+                    || eventResponse.getEventType().equals(EmailConstants.SYSTEM_ERROR)) {
+                User user = null;
+                Organization orgnizationDetails = organizationService.findByIsActive(true);
+                if (orgnizationDetails != null) {
+                    mimeEmail.setFrom(emailConfiguration.getEmailFrom());
+                    mimeEmail.setTo(orgnizationDetails.getEmail());
+                    mimeEmail.setBody(generateCountContent(eventResponse, user, domain, emailConfiguration,
+                            templateName, mimeEmail, eventPaymentResponse));
+                    if (mimeEmail.getBody() != null) {
+                        emailService.sendMail(mimeEmail);
+                    }
+                }
+            }
+            if (eventResponse.getEvent() != null && eventResponse.getEvent().equals(EventTypes.EVENT_USER_CREATE)
+                    || eventResponse.getEvent().equals(EventTypes.EVENT_USER_DELETE)
+                    || eventResponse.getEvent().equals(EventTypes.EVENT_USER_UPDATE)) {
+                User user = userService.find(Long.parseLong(eventResponse.getUser()));
+                mimeEmail.setFrom(emailConfiguration.getEmailFrom());
+                mimeEmail.setTo(user.getEmail());
+                mimeEmail.setBody(generateCountContent(eventResponse, user, domain, emailConfiguration, templateName,
+                        mimeEmail, eventPaymentResponse));
+                if (mimeEmail.getBody() != null) {
+                    emailService.sendMail(mimeEmail);
+                }
+            }
         }
     }
 
