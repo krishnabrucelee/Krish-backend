@@ -67,15 +67,15 @@ public class ThemeSetting implements Serializable {
     @Column(name = "splash_title_user", columnDefinition = "TEXT")
     private String splashTitleUser;
 
-    /** Welcome Text for login page. */
+    /** Welcome Text for Admin login page. */
     @Column(name = "welcome_content", columnDefinition = "TEXT")
     private String welcomeContent;
 
-    /** Welcome Text for login page. */
+    /** Welcome Text for User login page. */
     @Column(name = "welcome_content_user", columnDefinition = "TEXT")
     private String welcomeContentUser;
 
-    /** Welcome Text for login page. */
+    /** Footer Text for login page. */
     @Column(name = "footer_content", columnDefinition = "TEXT")
     private String footerContent;
 
