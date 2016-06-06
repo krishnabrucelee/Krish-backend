@@ -170,11 +170,12 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
      *
      * @param resource optional resource limit values
      * @return optional values
+     * @throws Exception error occurs
      */
-    public HashMap<String, String> optionalValues(ResourceLimitProject resource) {
+    public HashMap<String, String> optionalValues(ResourceLimitProject resource) throws Exception {
         HashMap<String, String> optionalMap = new HashMap<String, String>();
         if (resource.getProject() != null) {
-            optionalMap.put(CloudStackConstants.CS_PROJECT_ID, resource.getProject().getUuid());
+            optionalMap.put(CloudStackConstants.CS_PROJECT_ID, convertEntityService.getProjectUuidById(resource.getProjectId()));
         }
         if (resource.getMax() != null) {
             optionalMap.put(CS_MAX, resource.getMax().toString());
@@ -225,7 +226,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
 			if (resourceLimitsResponse.has(CloudStackConstants.CS_ERROR_CODE)) {
 				LOGGER.debug("ERROR IN RESOURCE PROJECT");
 			} else {
-				resource.setDomainId(resource.getDomain().getId());
+				resource.setDomainId(resource.getDomainId());
 				resource.setResourceType(resource.getResourceType());
 				resource.setMax(resource.getMax());
 			}
