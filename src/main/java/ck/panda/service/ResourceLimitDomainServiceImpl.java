@@ -151,12 +151,13 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
      *
      * @param resource optional resource limits values
      * @return optional values
+     * @throws Exception if error occurs
      */
-    public HashMap<String, String> optional(ResourceLimitDomain resource) {
+    public HashMap<String, String> optional(ResourceLimitDomain resource) throws Exception {
         HashMap<String, String> optional = new HashMap<String, String>();
 
         if (resource.getDomainId() != null) {
-            optional.put("domainid", resource.getDomain().getUuid());
+            optional.put("domainid", convertEntityService.getDomainUuidById(resource.getDomainId()));
         }
 
         if (resource.getMax() != null) {
@@ -206,7 +207,7 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
 							ResourceLimitDomain resourceData = resourceLimitDomainRepo.findOne(resource.getId());
 							resourceData.setMax(resource.getMax());
 							resourceData.setIsActive(true);
-							resourceData.setDomainId(resource.getDomain().getId());
+							resourceData.setDomainId(resource.getDomainId());
 							resourceLimitDomainRepo.save(resourceData);
 						} else {
 							updateResourceDomain(resource, errors);
@@ -217,10 +218,10 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
 				}
 			}
 			return (List<ResourceLimitDomain>) resourceLimitDomainRepo
-					.findAllByDomainIdAndIsActive(resourceLimits.get(0).getDomain().getId(), true);
+					.findAllByDomainIdAndIsActive(resourceLimits.get(0).getDomainId(), true);
 		} else {
 			return (List<ResourceLimitDomain>) resourceLimitDomainRepo
-					.findAllByDomainIdAndIsActive(resourceLimits.get(0).getDomain().getId(), true);
+					.findAllByDomainIdAndIsActive(resourceLimits.get(0).getDomainId(), true);
 		}
     }
 

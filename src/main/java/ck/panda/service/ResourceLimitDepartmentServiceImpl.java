@@ -134,17 +134,18 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
      *
      * @param resource optional resource limit values
      * @return optional values
+     * @throws Exception if error occurs
      */
-    public HashMap<String, String> optional(ResourceLimitDepartment resource) {
+    public HashMap<String, String> optional(ResourceLimitDepartment resource) throws Exception {
         HashMap<String, String> optional = new HashMap<String, String>();
         if (resource.getDomainId() != null) {
-            optional.put("domainid", resource.getDomain().getUuid());
+            optional.put("domainid", convertEntityService.getDomainUuidById(resource.getDomainId()));
         }
         if (resource.getDomain() != null) {
-            optional.put("domain", resource.getDomain().getName());
+            optional.put("domain", convertEntityService.getDomainById(resource.getDomainId()).getName());
         }
         if (resource.getDepartment() != null) {
-            optional.put("account", resource.getDepartment().getUserName());
+            optional.put("account", (convertEntityService.getDepartmentById(resource.getDepartmentId()).getUserName()));
         }
         if (resource.getMax() != null) {
             optional.put("max", resource.getMax().toString());
@@ -223,7 +224,7 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
 			if (resourceLimitsResponse.has("errorcode")) {
 				LOGGER.debug("ERROR IN RESOURCE DEPARTMENT");
 			} else {
-				resource.setDomainId(resource.getDomain().getId());
+				resource.setDomainId(resource.getDomainId());
 				resource.setResourceType(resource.getResourceType());
 				resource.setMax(resource.getMax());
 			}
